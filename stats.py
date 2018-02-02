@@ -75,7 +75,7 @@ class Discordlist(StatsAPI):
 			'https://bots.discordlist.net/api',
 			data=json.dumps({
 				'token': self.api_key,
-				'server_count': self.guild_count}),
+				'servers': self.guild_count}),
 			headers={'Content-Type': 'application/json'})
 
 
