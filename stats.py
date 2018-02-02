@@ -5,7 +5,7 @@ import sys
 import json
 
 import aiohttp
-
+from discord.ext import commands
 
 """A simple stats cog, for use with several bot lists.
 Make sure your bot.config['tokens']['stats'] has a key
@@ -40,6 +40,11 @@ class StatsAPI:
 	@property
 	def guild_count(self):
 		return len(self.bot.guilds)
+
+	@commands.command(name='send')
+	@commands.is_owner()
+	async def send_command(self, context):
+		await self.send()
 
 	async def on_ready(self):
 		await self.send()
