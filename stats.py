@@ -69,7 +69,7 @@ class DiscordPWStats(StatsAPI):
 
 	async def send(self):
 		await super().send(
-			'https://bots.discord.pw/api/bots/{}/stats'.format(self.bot.user.id),
+			'https://bots.discord.pw/api/bots/%s/stats' % self.bot.user.id,
 			data=json.dumps({'server_count': self.guild_count}),
 			headers={
 				'Authorization': self.api_key,
