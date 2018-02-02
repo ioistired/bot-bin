@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 
-import sys
 import json
+import sys
+import traceback
 
 import aiohttp
 from discord.ext import commands
@@ -41,10 +42,17 @@ class StatsAPI:
 	def guild_count(self):
 		return len(self.bot.guilds)
 
-	@commands.command(name='send')
+	@commands.command(name='stats')
 	@commands.is_owner()
 	async def send_command(self, context):
-		await self.send()
+		try:
+			await self.send()
+		except:
+			response = '\N{cross mark}'
+			print(traceback.format_exc(), file=sys.stderr)
+		else:
+			response = '\N{white heavy check mark}'
+		await context.message.add_reaction(response)
 
 	async def on_ready(self):
 		await self.send()
