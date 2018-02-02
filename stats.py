@@ -28,10 +28,10 @@ class StatsAPI:
 		"""send the statistics to the API gateway."""
 		async with self.session.post(url, data=data, headers=headers) as resp:
 			print('[STATS]', self.config_section, end=' ', file=sys.stderr)
-			if resp.status != 200:
-				print('failed with status code', resp.status, file=sys.stderr)
-			else:
+			if resp.status // 100 == 2:  # 2xx codes are success
 				print('response:', await resp.text(), file=sys.stderr)
+			else:
+				print('failed with status code', resp.status, file=sys.stderr)
 
 	@property
 	def api_key(self):
