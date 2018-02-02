@@ -76,8 +76,16 @@ class DiscordPWStats(StatsAPI):
 				'Content-Type': 'application/json'})
 
 
-class DiscordBotList(DiscordPWStats):
+class DiscordBotList(StatsAPI):
 	config_section = 'discordbots.org'
+
+	async def send(self):
+		await super().send(
+			'https://discordbots.org/api/bots/%s/stats' % self.bot.user.id,
+			data=json.dumps({'server_count': self.guild_count}),
+			headers={
+				'Authorization': self.api_key,
+				'Content-Type': 'application/json'})
 
 
 class Discordlist(StatsAPI):
