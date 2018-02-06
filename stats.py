@@ -37,7 +37,7 @@ class Stats:
 
 		for config_key in self.configured_apis:
 			url = 'https://{}/api/bots/{}/stats'.format(config_key, self.bot.user.id)
-			data = json.dumps({'server_count': len(self.bot.guilds)})
+			data = json.dumps({'server_count': self.guild_count})
 			headers = {'Authorization': self.config[config_key], 'Content-Type': 'application/json'}
 
 			async with self.session.post(url, data=data, headers=headers) as resp:
@@ -52,6 +52,13 @@ class Stats:
 	async def send_command(self, context):
 		await self.send()
 		await context.message.add_reaction('\N{white heavy check mark}')
+
+	@property
+	def guild_count(self):
+		count = len(self.bot.guilds)
+		if self.bot.user.id == 405953712113057794:  # Emoji Connoisseur
+			count -= 100
+		return count
 
 	async def on_ready(self):
 		await self.send()
