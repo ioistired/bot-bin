@@ -42,7 +42,7 @@ class StatsAPI:
 	def guild_count(self):
 		return len(self.bot.guilds)
 
-	@commands.command(name='stats')
+	@commands.command(name='stats', hidden=True)
 	@commands.is_owner()
 	async def send_command(self, context):
 		try:
