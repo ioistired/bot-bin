@@ -12,10 +12,15 @@ import humanize
 class Misc:
 	"""Miscellaneous commands that don't belong in any other category"""
 
+	# I think DISCORD_EPOCH is in milliseconds, but we want seconds.
 	UNKNOWN_CUTOFF = datetime.utcfromtimestamp(discord.utils.DISCORD_EPOCH // 1000)
 
 	def __init__(self, bot):
 		self.bot = bot
+
+	async def on_ready(self):
+		if not hasattr(self.bot, 'start_time'):
+			self.bot.start_time = datetime.utcnow()
 
 	@command()
 	async def userinfo(self, context, *, user: discord.User = None):
@@ -38,12 +43,20 @@ class Misc:
 				embed.add_field(name='Playing', value=user.game)
 		await context.send(embed=embed)
 
+	@command()
+	async def uptime(self, context):
+		"""Shows you how long the bot has been online."""
+		natural_time = humanize.naturaltime(datetime.utcnow() - self.bot.start_time).replace(' ago', '')
+		if natural_time == 'now':
+			natural_time = '0 seconds'
+		await context.send("I've been up for %s." % natural_time)
+
 	@classmethod
 	def format_time(cls, time):
 		if time is None or time < cls.UNKNOWN_CUTOFF:
 			return 'Unknown'
-		return '{} ({} UTC)'.format(
-			humanize.naturaltime(time + (datetime.now() - datetime.utcnow())), time)
+		natural_time = humanize.naturaltime(time + (datetime.now() - datetime.utcnow()))
+		return '%s (%s UTC)' % (natural_time, time)
 
 	@command()
 	async def ping(self, context):
