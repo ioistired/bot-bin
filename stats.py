@@ -50,18 +50,8 @@ class Stats:
 	@commands.command(name='stats', hidden=True)
 	@commands.is_owner()
 	async def send_command(self, context):
-		error = ''
-		try:
-			await cog.send()
-		except:
-			response = '\N{cross mark}'
-			error = 'Sending stats for %s failed!' % cog.config_section
-			print(error, file=sys.stderr)
-			print(traceback.format_exc(), file=sys.stderr)
-		else:
-			response = '\N{white heavy check mark}'
-		await context.message.add_reaction(response)
-		if error: await context.send(error)
+		await self.send()
+		await context.message.add_reaction('\N{white heavy check mark}')
 
 	async def on_ready(self):
 		await self.send()
