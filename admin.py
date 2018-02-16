@@ -17,10 +17,7 @@ class Admin:
 	@commands.command(hidden=True)
 	@commands.is_owner()
 	async def reload(self, context, *, cog: str):
-		"""Reload a cog.
-		The cog is expected to be located in `cogs/`.
-		"""
-		cog = self.bot.cogs_path + '.' + cog
+		"""Reload a cog."""
 
 		try:
 			self.bot.unload_extension(cog)
