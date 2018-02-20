@@ -4,6 +4,7 @@
 from datetime import datetime
 import time
 
+import aiofiles
 import discord
 from discord.ext.commands import command
 import humanize
@@ -21,6 +22,12 @@ class Misc:
 	async def on_ready(self):
 		if not hasattr(self.bot, 'start_time'):
 			self.bot.start_time = datetime.utcnow()
+
+	@command(aliases=['license'])
+	async def copyright(self, context):
+		"""Tells you about the copyright license for the bot"""
+		async with aiofiles.open(self.bot.config['copyright_license_file']) as f:
+			await context.send(await f.read())
 
 	@command()
 	async def userinfo(self, context, *, user: discord.User = None):
