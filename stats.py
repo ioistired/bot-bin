@@ -42,7 +42,7 @@ class Stats:
 
 		for config_key in self.configured_apis:
 			url = 'https://{}/api/bots/{}/stats'.format(config_key, self.bot.user.id)
-			data = json.dumps({'server_count': self.guild_count})
+			data = json.dumps({'server_count': await self.guild_count()})
 			headers = {'Authorization': self.config[config_key], 'Content-Type': 'application/json'}
 
 			async with self.session.post(url, data=data, headers=headers) as resp:
@@ -54,8 +54,7 @@ class Stats:
 				else:
 					logger.warning(f'{config_key} failed with status code {resp.status}')
 
-	@property
-	def guild_count(self):
+	async def guild_count(self):
 		"""Return the guild count for the bot associated with this cog.
 		Override this if your guild count needs manipulation."""
 		return len(self.bot.guilds)
