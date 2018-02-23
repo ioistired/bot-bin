@@ -28,7 +28,7 @@ class Stats:
 		self.configured_apis = []
 		for config_key in ('bots.discord.pw', 'discordbots.org'):
 			if self.config[config_key] is None:
-				logging.warning(config_key, "was not loaded! Please make sure it's configured correctly.")
+				logger.warning(f"{config_key} was not loaded! Please make sure it's configured correctly.")
 			else:
 				self.configured_apis.append(config_key)
 
@@ -50,9 +50,9 @@ class Stats:
 				print('[STATS]', config_key, end=' ', file=sys.stderr)
 				if resp.status // 100 == 2:  # 2xx codes are success
 					# unholy mix of f-strings and %s because f-strings aren't async
-					logging.info(f'{config_key} response: %s', await resp.text())
+					logger.info(f'{config_key} response: %s', await resp.text())
 				else:
-					logging.warning(f'{config key} failed with status code {resp.status}')
+					logger.warning(f'{config_key} failed with status code {resp.status}')
 
 	@property
 	def guild_count(self):
