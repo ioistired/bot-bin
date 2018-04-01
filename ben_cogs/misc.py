@@ -46,9 +46,21 @@ class Misc:
 			embed.add_field(name='Joined', value=self.format_time(user.joined_at))
 			embed.add_field(name='Roles', value=', '.join(
 				r.name for r in sorted(user.roles, key=lambda r: r.position, reverse=True)))
-			if user.game:
-				embed.add_field(name='Playing', value=user.game)
+			if user.activity is not None:
+				activity_type, activity_name = self.format_activity(user.activity)
+				embed.add_field(name=activity_type, value=activity_name)
 		await context.send(embed=embed)
+
+	@staticmethod
+	def format_activity(activity: discord.Activity):
+		"""return a two tuple of the member's activity type and the activity name
+		if joined with a space, it will look identical to what's displayed in the client.
+		"""
+		activity = member.activity
+		if activity is None:
+			return
+		# e.g. ('Playing', 'Fortnite')
+		return activity.type.name.title(), activity.name
 
 	@command()
 	async def uptime(self, context):
