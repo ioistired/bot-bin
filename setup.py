@@ -18,6 +18,7 @@ setup(
 	author='bmintz',
 	author_email='bmintz@protonmail.com',
 	url='https://github.com/bmintz/cogs',
+	download_url='https://github.com/bmintz/cogs/archive/{}.tar.gz'.format(version),
 	version=version,
 	packages=['ben_cogs'],
 	install_requires=requirements,
