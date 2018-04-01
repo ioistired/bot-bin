@@ -16,6 +16,7 @@ with open('ben_cogs/__init__.py') as f:
 setup(
 	name='ben_cogs',
 	author='bmintz',
+	author_email='bmintz@protonmail.com',
 	url='https://github.com/bmintz/cogs',
 	version=version,
 	packages=['ben_cogs'],
