@@ -32,7 +32,9 @@ class Stats:
 			else:
 				self.configured_apis.append(config_key)
 
-		bot.add_listener(self.send, 'on_ready')
+		self.bot.add_listener(self.send, 'on_ready')
+		for guild_change_event in 'on_guild_join', 'on_guild_remove':
+			self.bot.add_listener(self.on_guild_change, guild_change_event)
 
 	def __unload(self):
 		self.bot.loop.create_task(self.session.close())
@@ -65,10 +67,9 @@ class Stats:
 		await self.send()
 		await context.message.add_reaction('\N{white heavy check mark}')
 
-	async def on_guild_join(self, _):
+	async def on_guild_change(self, _):
 		await self.send()
 
-	on_guild_remove = on_guild_join
 
 def setup(bot):
 	bot.add_cog(Stats(bot))
