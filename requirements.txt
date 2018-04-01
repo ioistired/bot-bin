@@ -1,4 +1,3 @@
 aiofiles
-aiohttp
-git+https://github.com/Rapptz/discord.py@rewrite#egg=discord.py
+discord.py>=1.0.0a1430
 humanize
