@@ -5,10 +5,6 @@ import re
 from setuptools import setup
 
 
-with open('requirements.txt') as f:
-	requirements = f.read().splitlines()
-
-
 with open('ben_cogs/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
@@ -21,7 +17,10 @@ setup(
 	download_url='https://github.com/bmintz/cogs/archive/{}.tar.gz'.format(version),
 	version=version,
 	packages=['ben_cogs'],
-	install_requires=requirements,
+	install_requires=[
+		'aiofiles',
+		'discord.py>=1.0.0a1430',
+		'humanize'],
 	python_requires='>=3.6.0',
 	classifiers=[
 		'Development Status :: 3 - Alpha',
