@@ -56,7 +56,6 @@ class Misc:
 		"""return a two tuple of the member's activity type and the activity name
 		if joined with a space, it will look identical to what's displayed in the client.
 		"""
-		activity = member.activity
 		if activity is None:
 			return
 		# e.g. ('Playing', 'Fortnite')
