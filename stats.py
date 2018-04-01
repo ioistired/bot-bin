@@ -42,6 +42,8 @@ class Stats:
 	async def send(self):
 		"""send guild counts to the API gateways."""
 
+		await self.notify_owner()
+
 		for config_key in self.configured_apis:
 			url = 'https://{}/api/bots/{}/stats'.format(config_key, self.bot.user.id)
 			data = json.dumps({'server_count': await self.guild_count()})
@@ -55,6 +57,28 @@ class Stats:
 					logger.info(f'{config_key} response: %s', await resp.text())
 				else:
 					logger.warning(f'{config_key} failed with status code {resp.status}')
+
+	async def notify_owner(self):
+		"""Notify the owner of the bot if the guild count is large."""
+		guild_count = await self.guild_count()
+		# check if it's a power of two
+		# x = 0b100 (4)
+		# x-1 = 0b011
+		#   0b100
+		# & 0b011
+		# ───────
+		#   0b000
+		# ∵ x & x - 1 == 0
+		# ∴ x is a power of two
+		# also typically a bot is in a few guilds for testing (test server + DBL + discord.pw),
+		# so ignore 4 guilds
+		if guild_count > 4 and guild_count & (guild_count - 1) == 0:
+			await self._get_owner().send(f'Guild count ({guild_count}) is a power of 2!')
+
+	def _get_owner(self):
+		"""Get the bot's owner as a discord.py User object."""
+		owner_id = int(self.bot.config.get('send_logs_to', self.bot.owner_id))
+		return self.bot.get_user(owner_id)
 
 	async def guild_count(self):
 		"""Return the guild count for the bot associated with this cog.
