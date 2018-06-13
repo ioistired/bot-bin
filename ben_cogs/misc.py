@@ -29,7 +29,7 @@ class Misc:
 		async with aiofiles.open(self.bot.config['copyright_license_file']) as f:
 			await context.send(await f.read())
 
-	@command()
+	@command(hidden=True)
 	async def userinfo(self, context, *, user: discord.User = None):
 		# https://github.com/khazhyk/dango.py/blob/e613d4457045c131dc212686e74c325418fd1399/plugins/info.py#L208-L243
 		"""Show information about a user. Creds to @spoopy🍡#0567"""
