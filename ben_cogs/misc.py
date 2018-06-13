@@ -79,12 +79,15 @@ class Misc:
 	@command()
 	async def ping(self, context):
 		"""Shows the bots latency to Discord's servers"""
-		pong = '🏓 Pong! '
-		start = time.time()
-		message = await context.send(pong)
-		rtt = (time.time() - start) * 1000
-		# 10 µs is plenty precise
-		await message.edit(content=pong + '│{:.2f}ms'.format(rtt))
+		rtt = await self.timeit(context.trigger_typing())
+		await context.send(f'🏓 Pong! │{rtt}ms')
+
+	async def timeit(self, coro):
+		"""return how long it takes to await coro, in milliseconds"""
+		t0 = time.perf_counter()
+		await coro
+		t1 = time.perf_counter()
+		return round((t2-t1)*1000)
 
 
 def setup(bot):
