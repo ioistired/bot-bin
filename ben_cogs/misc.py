@@ -87,7 +87,7 @@ class Misc:
 		t0 = time.perf_counter()
 		await coro
 		t1 = time.perf_counter()
-		return round((t2-t1)*1000)
+		return round((t1-t0)*1000)
 
 
 def setup(bot):
