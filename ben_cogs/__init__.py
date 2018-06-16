@@ -4,7 +4,7 @@ __title__		= 'ben_cogs'
 __author__		= 'bmintz'
 __license__		= 'MIT'
 __copyright__ 	= 'Copyright © 2018 Benjamin Mintz'
-__version__ 	= '0.0.5'
+__version__ 	= '0.0.7'
 
 
 from . import admin, misc, stats
