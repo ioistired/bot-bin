@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 
-from collections import Counter
 import json
 import logging
 import sys
@@ -26,9 +25,12 @@ class Stats:
 		self.session = aiohttp.ClientSession(loop=bot.loop)
 		self.config = self.bot.config['tokens']['stats']
 
-		self.guild_counts = Counter()
-		self._update_counts()
-		self._load_configured_apis()
+		self.configured_apis = []
+		for config_key in ('bots.discord.pw', 'discordbots.org'):
+			if self.config[config_key] is None:
+				logger.warning(f"{config_key} was not loaded! Please make sure it's configured correctly.")
+			else:
+				self.configured_apis.append(config_key)
 
 		self.bot.add_listener(self.send, 'on_ready')
 		for guild_change_event in 'on_guild_join', 'on_guild_remove':
@@ -37,62 +39,48 @@ class Stats:
 	def __unload(self):
 		self.bot.loop.create_task(self.session.close())
 
-	def _update_counts(self):
-		for guild in self.bot.guilds:
-			self.guild_counts.update(guild.shard_id)
-
-	def _load_configured_apis(self):
-		self.configured_apis = []
-		for config_key in ('bots.discord.pw', 'discordbots.org'):
-			if self.config[config_key] is None:
-				logger.warning(f"{config_key} was not loaded! Please make sure it's configured correctly.")
-			else:
-				self.configured_apis.append(config_key)
-
 	async def send(self):
 		"""send guild counts to the API gateways."""
 
-		await self._notify_owner()
+		await self.notify_owner()
 
 		for config_key in self.configured_apis:
-			await self._post(config_key)
+			url = 'https://{}/api/bots/{}/stats'.format(config_key, self.bot.user.id)
+			data = json.dumps({'server_count': await self.guild_count()})
+			headers = {'Authorization': self.config[config_key], 'Content-Type': 'application/json'}
 
-	async def _post(self, config_key: str, shard=None):
-		url = 'https://{}/api/bots/{}/stats'.format(config_key, self.bot.user.id)
-		data = await self._get_data(shard)
-		headers = {'Authorization': self.config[config_key], 'Content-Type': 'application/json'}
+			async with self.session.post(url, data=data, headers=headers) as resp:
+				message = config_key
+				print('[STATS]', config_key, end=' ', file=sys.stderr)
+				if resp.status // 100 == 2:  # 2xx codes are success
+					# unholy mix of f-strings and %s because f-strings aren't async
+					logger.info(f'{config_key} response: %s', await resp.text())
+				else:
+					logger.warning(f'{config_key} failed with status code {resp.status}')
 
-		async with self.session.post(url, data=data, headers=headers) as resp:
-			if resp.status // 100 == 2:  # 2xx codes are success
-				logger.info('%s response: %s', config_key, await resp.text())
-			else:
-				logger.warning('%s failed with status code %s', config_key, resp.status)
-
-	async def _get_data(self, shard=None):
-		data = {'server_count': await self.guild_count(shard)}
-		if shard is not None:
-			data['shard_id'] = shard
-		return json.dumps(data)
-
-	async def _notify_owner(self):
+	async def notify_owner(self):
 		"""Notify the owner of the bot if the guild count is large."""
 		guild_count = await self.guild_count()
-		# check if it's a power of two, which is cause for celebration/concern
+		# check if it's a power of two
+		# x = 0b100 (4)
+		# x-1 = 0b011
+		#   0b100
+		# & 0b011
+		# ───────
+		#   0b000
+		# ∵ x & x - 1 == 0
+		# ∴ x is a power of two
 		# also typically a bot is in a few guilds for testing (test server + DBL + discord.pw),
 		# so ignore 4 guilds
-		if guild_count > 4 and self._power_of_two(guild_count):
+		if guild_count > 4 and guild_count & (guild_count - 1) == 0:
 			await self._get_owner().send(f'Guild count ({guild_count}) is a power of 2!')
-
-	@staticmethod
-	def _power_of_two(n):
-		return n & (n - 1) == 0
 
 	def _get_owner(self):
 		"""Get the bot's owner as a discord.py User object."""
 		owner_id = int(self.bot.config.get('send_logs_to', self.bot.owner_id))
 		return self.bot.get_user(owner_id)
 
-	async def guild_count(self, shard=None):
+	async def guild_count(self):
 		"""Return the guild count for the bot associated with this cog.
 		Override this if your guild count needs manipulation."""
 		return len(self.bot.guilds)
@@ -103,8 +91,8 @@ class Stats:
 		await self.send()
 		await context.message.add_reaction('\N{white heavy check mark}')
 
-	async def on_guild_change(self, guild):
-		await self.send(guild.shard_id)
+	async def on_guild_change(self, _):
+		await self.send()
 
 
 def setup(bot):
