@@ -20,14 +20,21 @@ logger = logging.getLogger('stats')
 class Stats:
 	# credit to @Tom™#7887 (ID 248294452307689473) on the Discord Bots List guild
 	# for much of this
+
+	API_URLS = {
+		'bots.discord.pw':    'https://bots.discord.pw/api/bots/{}/stats',
+		'discordbots.org':    'https://discordbots.org/api/bots/{}/stats',
+		'botsfordiscord.com': 'https://botsfordiscord.com/api/v1/bots/{}',
+	}
+
 	def __init__(self, bot):
 		self.bot = bot
 		self.session = aiohttp.ClientSession(loop=bot.loop)
 		self.config = self.bot.config['tokens']['stats']
 
 		self.configured_apis = []
-		for config_key in ('bots.discord.pw', 'discordbots.org'):
-			if self.config[config_key] is None:
+		for config_key in self.API_URLS:
+			if self.config.get(config_key) is None:
 				logger.warning(f"{config_key} was not loaded! Please make sure it's configured correctly.")
 			else:
 				self.configured_apis.append(config_key)
@@ -45,18 +52,16 @@ class Stats:
 		await self.notify_owner()
 
 		for config_key in self.configured_apis:
-			url = 'https://{}/api/bots/{}/stats'.format(config_key, self.bot.user.id)
+			url = self.API_URLS[config_key].format(self.bot.user.id)
 			data = json.dumps({'server_count': await self.guild_count()})
 			headers = {'Authorization': self.config[config_key], 'Content-Type': 'application/json'}
 
 			async with self.session.post(url, data=data, headers=headers) as resp:
 				message = config_key
-				print('[STATS]', config_key, end=' ', file=sys.stderr)
 				if resp.status // 100 == 2:  # 2xx codes are success
-					# unholy mix of f-strings and %s because f-strings aren't async
-					logger.info(f'{config_key} response: %s', await resp.text())
+					logger.info('%s response: %s', config_key, await resp.text())
 				else:
-					logger.warning(f'{config_key} failed with status code {resp.status}')
+					logger.warning('%s failed with status code %s', config_key, resp.status)
 
 	async def notify_owner(self):
 		"""Notify the owner of the bot if the guild count is large."""
