@@ -5,9 +5,15 @@ import asyncio
 from contextlib import redirect_stdout
 import io
 
-from discord.ext.commands import command
+import discord.ext.commands
 import objgraph
 
+
+# ensure all commands in this module are hidden
+# since there is no default way to hide an entire cog
+def command(*args, **kwargs):
+	kwargs['hidden'] = True
+	return discord.ext.commands.command(*args, **kwargs)
 
 # using code provided by khazhyk
 # Copyright © 2017 khazhyk
