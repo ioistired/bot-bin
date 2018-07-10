@@ -28,8 +28,14 @@ class Debug:
 	async def __local_check(self, context):
 		return await context.bot.is_owner(context.author)
 
+	@command(name='most-common-types')
+	async def most_common_types(self, context):
+		await context.send(str(await context.bot.loop.run_in_executor(None, objgraph.most_common_types)))
+
 	@command()
 	async def objgrowth(self, context):
+		"""Show the increase in peak object counts since last call."""
+
 		stdout = io.StringIO()
 
 		with redirect_stdout(stdout):
