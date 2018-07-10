@@ -57,7 +57,6 @@ class Stats:
 			headers = {'Authorization': self.config[config_key], 'Content-Type': 'application/json'}
 
 			async with self.session.post(url, data=data, headers=headers) as resp:
-				message = config_key
 				if resp.status // 100 == 2:  # 2xx codes are success
 					logger.info('%s response: %s', config_key, await resp.text())
 				else:

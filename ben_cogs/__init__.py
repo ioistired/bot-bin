@@ -7,4 +7,4 @@ __copyright__ 	= 'Copyright © 2018 Benjamin Mintz'
 __version__ 	= '0.0.10'
 
 
-from . import misc, stats
+from . import debug, misc, stats

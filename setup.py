@@ -20,7 +20,8 @@ setup(
 	install_requires=[
 		'aiofiles',
 		'discord.py>=1.0.0a1430',
-		'humanize'],
+		'humanize',
+		'objgraph'],
 	python_requires='>=3.6.0',
 	license='MIT',
 	classifiers=[
