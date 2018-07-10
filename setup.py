@@ -21,7 +21,8 @@ setup(
 		'aiofiles',
 		'discord.py>=1.0.0a1430',
 		'humanize',
-		'objgraph'],
+		'objgraph',
+		'pustil'],
 	python_requires='>=3.6.0',
 	license='MIT',
 	classifiers=[
