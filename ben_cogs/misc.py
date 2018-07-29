@@ -32,10 +32,17 @@ class Misc:
 	@command()
 	async def uptime(self, context):
 		"""Shows you how long the bot has been online."""
+		await context.send(self.uptime())
+
+	def uptime(self, *, brief=False):
 		natural_time = humanize.naturaltime(datetime.utcnow() - self.bot.start_time).replace(' ago', '')
 		if natural_time == 'now':
 			natural_time = '0 seconds'
-		await context.send("I've been up for %s." % natural_time)
+
+		if brief:
+			return natural_time
+		else:
+			return f"I've been up for {natural_time}."
 
 	@command()
 	async def ping(self, context):

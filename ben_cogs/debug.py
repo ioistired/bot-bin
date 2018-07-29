@@ -49,7 +49,11 @@ class Debug:
 
 		output is in base 10 units unless base1024 is set to True
 		"""
-		await context.send(humanize.naturalsize(self.process.memory_full_info().uss, binary=base1024))
+		await context.send(self.memory_usage(base1024=base1024))
+
+	def memory_usage(self, *, base1024=False):
+		return humanize.naturalsize(self.process.memory_full_info().uss, binary=base1024)
+
 
 def setup(bot):
 	bot.add_cog(Debug())
