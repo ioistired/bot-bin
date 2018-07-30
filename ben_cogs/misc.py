@@ -60,3 +60,5 @@ class Misc:
 
 def setup(bot):
 	bot.add_cog(Misc(bot))
+	if not bot.config.get('copyright_license_file'):
+		bot.remove_command('copyright')
