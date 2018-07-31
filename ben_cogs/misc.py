@@ -29,8 +29,8 @@ class Misc:
 		async with aiofiles.open(self.bot.config['copyright_license_file']) as f:
 			await context.send(await f.read())
 
-	@command()
-	async def uptime(self, context):
+	@command(name='uptime')
+	async def uptime_command(self, context):
 		"""Shows you how long the bot has been online."""
 		await context.send(self.uptime())
 
