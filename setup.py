@@ -18,7 +18,6 @@ setup(
 	version=version,
 	packages=['ben_cogs'],
 	install_requires=[
-		'aiofiles',
 		'discord.py>=1.0.0a1430',
 		'humanize',
 		'objgraph',

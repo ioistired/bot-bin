@@ -4,11 +4,9 @@
 from datetime import datetime
 import time
 
-import aiofiles
 import discord
 from discord.ext.commands import command
 import humanize
-
 
 class Misc:
 	"""Miscellaneous commands that don't belong in any other category"""
@@ -18,6 +16,8 @@ class Misc:
 
 	def __init__(self, bot):
 		self.bot = bot
+		with open(self.bot.config['copyright_license_file']) as f:
+			self.license_message = f.read()
 
 	async def on_ready(self):
 		if not hasattr(self.bot, 'start_time'):
@@ -26,8 +26,7 @@ class Misc:
 	@command(aliases=['license'])
 	async def copyright(self, context):
 		"""Tells you about the copyright license for the bot"""
-		async with aiofiles.open(self.bot.config['copyright_license_file']) as f:
-			await context.send(await f.read())
+		await context.send(self.license_message)
 
 	@command(name='uptime')
 	async def uptime_command(self, context):
@@ -56,7 +55,6 @@ class Misc:
 		await coro
 		t1 = time.perf_counter()
 		return round((t1-t0)*1000)
-
 
 def setup(bot):
 	bot.add_cog(Misc(bot))

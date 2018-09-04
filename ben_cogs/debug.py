@@ -47,7 +47,7 @@ class Debug:
 	async def mem(self, context, base1024: bool = False):
 		"""current memory usage
 
-		output is in base 10 units unless base1024 is set to True
+		output is in base 1000 units unless base1024 is set to True
 		"""
 		await context.send(self.memory_usage(base1024=base1024))
 
