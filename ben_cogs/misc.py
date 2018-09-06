@@ -49,6 +49,15 @@ class Misc:
 		rtt = await self.timeit(context.trigger_typing())
 		await context.send(f'🏓 Pong! │{rtt}ms')
 
+	@command(hidden=True)
+	async def pong(self, context):
+		message = await context.send('Ping')
+		if message.created_at > context.message.created_at:
+			# if this message hasn't appeared before the invoking message, delete
+			await message.delete()
+		# due to loose snowflake ordering, we time travelled
+		# so leave the reply message alone
+
 	async def timeit(self, coro):
 		"""return how long it takes to await coro, in milliseconds"""
 		t0 = time.perf_counter()
