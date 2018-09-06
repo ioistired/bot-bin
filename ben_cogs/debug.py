@@ -26,7 +26,9 @@ class Debug:
 		self.process = psutil.Process()
 
 	async def __local_check(self, context):
-		return await context.bot.is_owner(context.author)
+		if not await context.bot.is_owner(context.author):
+			raise commands.NotOwner
+		return True
 
 	@command(name='most-common-types')
 	async def most_common_types(self, context):
