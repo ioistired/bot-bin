@@ -34,7 +34,7 @@ class Misc:
 		await context.send(self.uptime())
 
 	def uptime(self, *, brief=False):
-		natural_time = humanize.naturaltime(datetime.utcnow() - self.bot.start_time).replace(' ago', '')
+		natural_time = humanize.naturaldelta(datetime.utcnow() - self.bot.start_time)
 		if natural_time == 'now':
 			natural_time = '0 seconds'
 
