@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 from datetime import datetime
+import os.path
 import time
 
 import discord
@@ -16,6 +17,12 @@ class Misc:
 
 	def __init__(self, bot):
 		self.bot = bot
+
+		filename = self.bot.config.get('copyright_license_file')
+		if not filename or not os.path.isfile(filename):
+			del type(self).copyright
+			return
+
 		with open(self.bot.config['copyright_license_file']) as f:
 			self.license_message = f.read()
 
@@ -67,5 +74,3 @@ class Misc:
 
 def setup(bot):
 	bot.add_cog(Misc(bot))
-	if not bot.config.get('copyright_license_file'):
-		bot.remove_command('copyright')
