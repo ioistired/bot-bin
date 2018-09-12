@@ -53,13 +53,18 @@ class Misc:
 	@command()
 	async def ping(self, context):
 		"""Shows the bots latency to Discord's servers"""
-		rtt = await self.timeit(context.trigger_typing())
+		# trigger typing in DMs to minimize disruption
+		# as sometimes a low enough ping means that the reply message
+		# does not cancel the typing
+		# also apparently we can always trigger typing in DMs
+		# even if they blocked us
+		rtt = await self.timeit(context.author.trigger_typing())
 		await context.send(f'🏓 Pong! │{rtt}ms')
 
 	@command(hidden=True)
 	async def pong(self, context):
 		message = await context.send('Ping')
-		if message.created_at > context.message.created_at:
+		if message.created_at >= context.message.created_at:
 			# if this message hasn't appeared before the invoking message, delete
 			await message.delete()
 		# due to loose snowflake ordering, we time travelled
