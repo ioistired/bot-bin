@@ -18,7 +18,7 @@ class ImportExpressionJishaku(jishaku.cog.Jishaku):
 			'discord': discord,
 			'commands': discord.ext.commands,
 
-			import_expression._constants.IMPORTER: importlib.import_module,
+			import_expression.constants.IMPORTER: importlib.import_module,
 		})
 
 	async def repl_backend(self, ctx: commands.Context, code: str, callback):
