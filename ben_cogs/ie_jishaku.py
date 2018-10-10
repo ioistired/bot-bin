@@ -1,6 +1,7 @@
 import asyncio
 import importlib
 import inspect
+import pydoc
 
 import discord
 from discord.ext import commands
@@ -12,14 +13,15 @@ from jishaku import utils
 class ImportExpressionJishaku(jishaku.cog.Jishaku):
 	def __init__(self, bot):
 		super().__init__(bot)
-		self.repl_global_scope.update({
+		self.repl_global_scope = {
 			'_bot': self.bot,
 			'asyncio': asyncio,
 			'discord': discord,
 			'commands': discord.ext.commands,
+			'help': pydoc.gethelp,
 
 			import_expression.constants.IMPORTER: importlib.import_module,
-		})
+		}
 
 	async def repl_backend(self, ctx: commands.Context, code: str, callback):
 		"""
