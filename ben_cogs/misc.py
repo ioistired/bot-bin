@@ -63,10 +63,10 @@ class Misc:
 
 	@command(hidden=True)
 	async def pong(self, context):
-		message = await context.send('Ping')
-		if message.created_at >= context.message.created_at:
-			# if this message hasn't appeared before the invoking message, delete
-			await message.delete()
+		reply = await context.send('Ping')
+		if context.message.created_at < reply.created_at:
+			# the messages appeared in the correct order
+			await reply.delete()
 		# due to loose snowflake ordering, we time travelled
 		# so leave the reply message alone
 
