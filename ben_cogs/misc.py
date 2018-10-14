@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 
+import contextlib
 from datetime import datetime
 import os.path
 import time
@@ -17,10 +18,17 @@ class Misc:
 
 	def __init__(self, bot):
 		self.bot = bot
+		self._init_license()
 
-		filename = self.bot.config.get('copyright_license_file')
+	def _init_license(self):
+		try:
+			filename = self.bot.config.get('copyright_license_file')
+		except AttributeError:
+			return
+
 		if not filename or not os.path.isfile(filename):
-			del type(self).copyright
+			with contextlib.suppress(AttributeError):
+				del type(self).copyright
 			return
 
 		with open(self.bot.config['copyright_license_file']) as f:
