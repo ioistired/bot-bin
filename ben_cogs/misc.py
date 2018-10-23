@@ -49,7 +49,13 @@ class Misc:
 		await context.send(self.uptime())
 
 	def uptime(self, *, brief=False):
-		natural_time = humanize.naturaldelta(datetime.utcnow() - self.bot.start_time)
+		try:
+			natural_time = humanize.naturaldelta(datetime.utcnow() - self.bot.start_time)
+		except AttributeError:
+			if brief:
+				return 'Not up yet'
+			return "I'm not up yet."
+
 		if natural_time == 'now':
 			natural_time = '0 seconds'
 
