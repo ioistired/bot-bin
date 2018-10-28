@@ -7,7 +7,6 @@ import time
 
 import discord
 from discord.ext.commands import command
-import humanize
 
 class Misc:
 	"""Miscellaneous commands that don't belong in any other category"""
@@ -41,14 +40,62 @@ class Misc:
 		await context.send(self.uptime())
 
 	def uptime(self, *, brief=False):
-		natural_time = humanize.naturaldelta(datetime.utcnow() - self.bot.start_time)
-		if natural_time == 'now':
+		try:
+			seconds = (datetime.utcnow() - self.bot.start_time).total_seconds()
+		except AttributeError:
+			if brief:
+				return "not up yet"
+			return "I'm not up yet."
+
+		if seconds < 1:
 			natural_time = '0 seconds'
+		else:
+			natural_time = self.natural_time(round(seconds))
 
 		if brief:
 			return natural_time
 		else:
 			return f"I've been up for {natural_time}."
+
+	@classmethod
+	def natural_time(cls, seconds: int):
+		days, hours, minutes, seconds = cls.split_seconds(round(seconds))
+		# don't include "0 minutes"
+		words = [
+			(word, value)
+			for (word, value) in
+			(('day', days), ('hour', hours), ('minute', minutes), ('second', seconds))
+			if value]
+
+		return cls.oxford_comma_join([cls.naive_pluralize(word, value) for word, value in words])
+
+	@staticmethod
+	def naive_pluralize(s, n):
+		"""return word s pluralized naïvely if n != 1
+		we use this instead of inflect because inflect is AGPLv3 licensed
+
+		>>> naive_pluralize("word", 5)
+		"5 words"
+		>>> naive_pluralize("word", 1)
+		"5 word"
+		"""
+		suffix = 's' if n != 1 else ''
+		return f'{n} {s}{suffix}'
+
+	@staticmethod
+	def split_seconds(seconds: int):
+		minutes, seconds = divmod(seconds, 60)
+		hours, minutes = divmod(minutes, 60)
+		days, hours = divmod(hours, 24)
+		return days, hours, minutes, seconds
+
+	@staticmethod
+	def oxford_comma_join(xs):
+		init = xs[:-1]
+		last = xs[-1]
+		use_oxford_comma = len(xs) > 2  # [x, y] -> "x and y", but [x, y, z] -> "x, y, and z"
+		end_sep = ', and ' if use_oxford_comma else ' and '
+		return end_sep.join((', '.join(init), last)) if init else last
 
 	@command()
 	async def ping(self, context):
