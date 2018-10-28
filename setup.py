@@ -4,7 +4,6 @@
 import re
 from setuptools import setup
 
-
 with open('ben_cogs/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
@@ -37,5 +36,6 @@ setup(
 		'Natural Language :: English',
 		'Operating System :: OS Independent',
 		'Programming Language :: Python :: 3.6',
+		'Programming Language :: Python :: 3.7',
 		'Topic :: Internet',
 		'Topic :: Utilities'])
