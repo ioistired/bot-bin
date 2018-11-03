@@ -18,7 +18,7 @@ class ImportExpressionJishaku(jishaku.cog.Jishaku):
 			'asyncio': asyncio,
 			'discord': discord,
 			'commands': discord.ext.commands,
-			'help': lambda x: '```'+pydoc.render_doc+'```',
+			'help': lambda x: '```'+pydoc.render_doc(x)+'```',
 
 			import_expression.constants.IMPORTER: importlib.import_module,
 		}
