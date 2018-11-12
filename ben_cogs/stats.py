@@ -98,6 +98,8 @@ class BenCogsStats:
 	async def on_guild_change(self, _):
 		await self.send()
 
+# maintain alias for backwards compatibility of subclasses
+Stats = BenCogsStats
 
 def setup(bot):
 	bot.add_cog(BenCogsStats(bot))

@@ -70,6 +70,8 @@ class BenCogsDebug:
 	def memory_usage(self, *, base1024=False):
 		return humanize.naturalsize(self.process.memory_full_info().uss, binary=base1024)
 
+# maintain alias for backwards compatibility of subclasses
+Debug = BenCogsDebug
 
 def setup(bot):
 	bot.add_cog(BenCogsDebug())

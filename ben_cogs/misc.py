@@ -132,5 +132,8 @@ class BenCogsMisc:
 		t1 = time.perf_counter()
 		return round((t1-t0)*1000)
 
+# maintain alias for backwards compatibility of subclasses
+Misc = BenCogsMisc
+
 def setup(bot):
 	bot.add_cog(BenCogsMisc(bot))
