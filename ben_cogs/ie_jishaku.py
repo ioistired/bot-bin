@@ -101,9 +101,26 @@ class ImportExpressionJishaku(jishaku.cog.Jishaku):
 		:param result: The object to be converted
 		:return: The message sent
 		"""
+		if result is None:
+			return
+
 		if isinstance(result, discord.Embed):
 			return await ctx.send(embed=result)
-		return await super().py_callback(ctx, result)
+
+		if isinstance(result, discord.File):
+			return await ctx.send(file=result)
+
+		if not isinstance(result, str):
+			result = repr(result)
+
+		if len(result) > 2000:
+			file = discord.File(fp=io.StringIO(result), filename='output.txt')
+			return await ctx.send('Output too long.', file=file)
+
+		if not result.strip():
+			result = '\N{zero width space}'
+
+		return await ctx.send(result)
 
 def setup(bot):
 	bot.add_cog(ImportExpressionJishaku(bot))
