@@ -1,6 +1,8 @@
 import asyncio
+import contextlib
 import importlib
 import inspect
+import io
 import pydoc
 import typing
 
@@ -8,8 +10,22 @@ import discord
 from discord.ext import commands
 import import_expression
 import jishaku.cog
-from jishaku.cog import Jishaku, SEMICOLON_LOOKAROUND
+from jishaku.cog import SEMICOLON_LOOKAROUND
 from jishaku import utils
+
+# normally i avoid redirect_stdout in async code
+# but since this function is blocking anyway, it's fine
+# also we use pydoc.help instead of pydoc.render_doc
+# because the latter does not support topics, such as help('OPERATORS')
+# also, even though pydoc.Helper supports a custom output var,
+# it is not written to for help topics either
+def help(x):
+	"""Show documentation on a function, class, module, or help topic."""
+	out = io.StringIO()
+	with contextlib.redirect_stdout(out):
+		pydoc.help(x)
+	cleaned = out.getvalue().replace('`', '\N{zero width space}`')
+	return '```\n' + cleaned + '\n```'
 
 class ImportExpressionJishaku(jishaku.cog.Jishaku):
 	def __init__(self, bot):
@@ -19,7 +35,7 @@ class ImportExpressionJishaku(jishaku.cog.Jishaku):
 			'asyncio': asyncio,
 			'discord': discord,
 			'commands': discord.ext.commands,
-			'help': lambda x: '```'+pydoc.render_doc(x)+'```',
+			'help': help,
 
 			import_expression.constants.IMPORTER: importlib.import_module,
 		}
