@@ -17,7 +17,7 @@ which maps each domain name to either null or a token.
 logger = logging.getLogger('stats')
 
 
-class Stats:
+class BenCogsStats:
 	# credit to @Tom™#7887 (ID 248294452307689473) on the Discord Bots List guild
 	# for much of this
 
@@ -100,4 +100,4 @@ class Stats:
 
 
 def setup(bot):
-	bot.add_cog(Stats(bot))
+	bot.add_cog(BenCogsStats(bot))
