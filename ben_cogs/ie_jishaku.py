@@ -2,6 +2,7 @@ import asyncio
 import importlib
 import inspect
 import pydoc
+import typing
 
 import discord
 from discord.ext import commands
@@ -75,6 +76,18 @@ class ImportExpressionJishaku(jishaku.cog.Jishaku):
 			await callback(ctx, result)
 
 		return result
+
+	@staticmethod
+	async def py_callback(ctx: commands.Context, result) -> typing.Optional[discord.Message]:
+		"""
+		Callback that converts the result into a chat-compatible format and sends it to the chat.
+		:param ctx: Context, passed by caller
+		:param result: The object to be converted
+		:return: The message sent
+		"""
+		if isinstance(result, discord.Embed):
+			return await ctx.send(embed=result)
+		return await super().py_callback(ctx, result)
 
 def setup(bot):
 	bot.add_cog(ImportExpressionJishaku(bot))
