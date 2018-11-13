@@ -8,6 +8,9 @@ import time
 
 import discord
 from discord.ext.commands import command
+import inflect
+
+inflect = inflect.engine()
 
 class Misc:
 	"""Miscellaneous commands that don't belong in any other category"""
@@ -68,27 +71,13 @@ class Misc:
 	@classmethod
 	def natural_time(cls, seconds: int):
 		days, hours, minutes, seconds = cls.split_seconds(round(seconds))
-		# don't include "0 minutes"
-		words = [
-			(word, value)
-			for (word, value) in
-			(('day', days), ('hour', hours), ('minute', minutes), ('second', seconds))
-			if value]
+		words = (('day', days), ('hour', hours), ('minute', minutes), ('second', seconds))
 
-		return cls.oxford_comma_join([cls.naive_pluralize(word, value) for word, value in words])
+		return inflect.join([cls.pluralize(word, value) for word, value in words if value])
 
 	@staticmethod
-	def naive_pluralize(s, n):
-		"""return word s pluralized naïvely if n != 1
-		we use this instead of inflect because inflect is AGPLv3 licensed
-
-		>>> naive_pluralize("word", 5)
-		"5 words"
-		>>> naive_pluralize("word", 1)
-		"5 word"
-		"""
-		suffix = 's' if n != 1 else ''
-		return f'{n} {s}{suffix}'
+	def pluralize(word, value):
+		return f'{value} {inflect.plural_noun(word, value)}'
 
 	@staticmethod
 	def split_seconds(seconds: int):
@@ -96,14 +85,6 @@ class Misc:
 		hours, minutes = divmod(minutes, 60)
 		days, hours = divmod(hours, 24)
 		return days, hours, minutes, seconds
-
-	@staticmethod
-	def oxford_comma_join(xs):
-		init = xs[:-1]
-		last = xs[-1]
-		use_oxford_comma = len(xs) > 2  # [x, y] -> "x and y", but [x, y, z] -> "x, y, and z"
-		end_sep = ', and ' if use_oxford_comma else ' and '
-		return end_sep.join((', '.join(init), last)) if init else last
 
 	@command()
 	async def ping(self, context):

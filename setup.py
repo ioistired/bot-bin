@@ -23,6 +23,7 @@ setup(
 		'discord.py>=1.0.0a1430',
 		'humanize',
 		'import_expression<1.0.0',
+		'inflect',
 		'jishaku',
 		'objgraph',
 		'psutil'],
