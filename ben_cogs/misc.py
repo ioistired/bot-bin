@@ -70,8 +70,8 @@ class BenCogsMisc:
 
 	@classmethod
 	def natural_time(cls, seconds: int):
-		days, hours, minutes, seconds = cls.split_seconds(round(seconds))
-		words = (('day', days), ('hour', hours), ('minute', minutes), ('second', seconds))
+		split = cls.split_seconds(round(seconds))
+		words = zip(('week', 'day', 'hour', 'minute', 'second'), split)
 
 		return inflect.join([cls.pluralize(word, value) for word, value in words if value])
 
@@ -84,7 +84,10 @@ class BenCogsMisc:
 		minutes, seconds = divmod(seconds, 60)
 		hours, minutes = divmod(minutes, 60)
 		days, hours = divmod(hours, 24)
-		return days, hours, minutes, seconds
+		weeks, days = divmod(days, 7)
+		# we would stop at weeks because that is the largest unit that we can divide exactly
+		# ie a week is always 7 days, but a month is not always 4 weeks.
+		return weeks, days, hours, minutes, seconds
 
 	@command()
 	async def ping(self, context):
