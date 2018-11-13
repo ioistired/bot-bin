@@ -1,14 +1,31 @@
 import asyncio
+import contextlib
 import importlib
 import inspect
+import io
 import pydoc
+import typing
 
 import discord
 from discord.ext import commands
 import import_expression
 import jishaku.cog
-from jishaku.cog import Jishaku, SEMICOLON_LOOKAROUND
+from jishaku.cog import SEMICOLON_LOOKAROUND
 from jishaku import utils
+
+# normally i avoid redirect_stdout in async code
+# but since this function is blocking anyway, it's fine
+# also we use pydoc.help instead of pydoc.render_doc
+# because the latter does not support topics, such as help('OPERATORS')
+# also, even though pydoc.Helper supports a custom output var,
+# it is not written to for help topics either
+def help(x):
+	"""Show documentation on a function, class, module, or help topic."""
+	out = io.StringIO()
+	with contextlib.redirect_stdout(out):
+		pydoc.help(x)
+	cleaned = out.getvalue().replace('`', '\N{zero width space}`')
+	return '```\n' + cleaned + '\n```'
 
 class ImportExpressionJishaku(jishaku.cog.Jishaku):
 	def __init__(self, bot):
@@ -18,7 +35,7 @@ class ImportExpressionJishaku(jishaku.cog.Jishaku):
 			'asyncio': asyncio,
 			'discord': discord,
 			'commands': discord.ext.commands,
-			'help': lambda x: '```'+pydoc.render_doc+'```',
+			'help': help,
 
 			import_expression.constants.IMPORTER: importlib.import_module,
 		}
@@ -75,6 +92,35 @@ class ImportExpressionJishaku(jishaku.cog.Jishaku):
 			await callback(ctx, result)
 
 		return result
+
+	@staticmethod
+	async def py_callback(ctx: commands.Context, result) -> typing.Optional[discord.Message]:
+		"""
+		Callback that converts the result into a chat-compatible format and sends it to the chat.
+		:param ctx: Context, passed by caller
+		:param result: The object to be converted
+		:return: The message sent
+		"""
+		if result is None:
+			return
+
+		if isinstance(result, discord.Embed):
+			return await ctx.send(embed=result)
+
+		if isinstance(result, discord.File):
+			return await ctx.send(file=result)
+
+		if not isinstance(result, str):
+			result = repr(result)
+
+		if len(result) > 2000:
+			file = discord.File(fp=io.StringIO(result), filename='output.txt')
+			return await ctx.send('Output too long.', file=file)
+
+		if not result.strip():
+			result = '\N{zero width space}'
+
+		return await ctx.send(result)
 
 def setup(bot):
 	bot.add_cog(ImportExpressionJishaku(bot))
