@@ -14,6 +14,7 @@ setup(
 	name='ben_cogs',
 	author='bmintz',
 	author_email='bmintz@protonmail.com',
+	description='Shared cogs for use in Discord bots',
 	url='https://github.com/bmintz/cogs',
 	download_url='https://github.com/bmintz/cogs/archive/{}.tar.gz'.format(version),
 	version=version,
