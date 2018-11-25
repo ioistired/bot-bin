@@ -24,7 +24,7 @@ setup(
 		'humanize',
 		'import_expression<1.0.0',
 		'inflect',
-		'jishaku',
+		'jishaku<1.0.0',
 		'objgraph',
 		'psutil'],
 	python_requires='>=3.6.0',
