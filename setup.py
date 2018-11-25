@@ -21,11 +21,9 @@ setup(
 	packages=['ben_cogs'],
 	dependency_links=dependency_links,
 	install_requires=[
-		'discord.py>=1.0.0a1430',
 		'humanize',
-		'import_expression<1.0.0',
 		'inflect',
-		'jishaku<1.0.0',
+		'jishaku>=1.1.1,<2.0.0',
 		'objgraph',
 		'psutil'],
 	python_requires='>=3.6.0',
