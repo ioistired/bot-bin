@@ -15,9 +15,6 @@ inflect = inflect.engine()
 class BenCogsMisc:
 	"""Miscellaneous commands that don't belong in any other category"""
 
-	# I think DISCORD_EPOCH is in milliseconds, but we want seconds.
-	UNKNOWN_CUTOFF = datetime.utcfromtimestamp(discord.utils.DISCORD_EPOCH // 1000)
-
 	def __init__(self, bot):
 		self.bot = bot
 		self._init_license()
@@ -85,7 +82,7 @@ class BenCogsMisc:
 		hours, minutes = divmod(minutes, 60)
 		days, hours = divmod(hours, 24)
 		weeks, days = divmod(days, 7)
-		# we would stop at weeks because that is the largest unit that we can divide exactly
+		# we stop at weeks because that is the largest unit that we can divide exactly
 		# ie a week is always 7 days, but a month is not always 4 weeks.
 		return weeks, days, hours, minutes, seconds
 
