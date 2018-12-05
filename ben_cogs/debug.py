@@ -71,7 +71,9 @@ class BenCogsDebug:
 		return humanize.naturalsize(self.process.memory_full_info().uss, binary=base1024)
 
 # maintain alias for backwards compatibility of subclasses
-Debug = BenCogsDebug
+# we use a dummy class to update __name__
+class Debug(BenCogsDebug):
+	pass
 
 def setup(bot):
 	bot.add_cog(BenCogsDebug())

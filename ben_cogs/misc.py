@@ -114,7 +114,8 @@ class BenCogsMisc:
 		return round((t1-t0)*1000)
 
 # maintain alias for backwards compatibility of subclasses
-Misc = BenCogsMisc
+class Misc(BenCogsMisc):
+	pass
 
 def setup(bot):
 	bot.add_cog(BenCogsMisc(bot))

@@ -99,7 +99,8 @@ class BenCogsStats:
 		await self.send()
 
 # maintain alias for backwards compatibility of subclasses
-Stats = BenCogsStats
+class Stats(BenCogsStats):
+	pass
 
 def setup(bot):
 	bot.add_cog(BenCogsStats(bot))
