@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 import contextlib
-from datetime import datetime
+import math
 import os.path
 import time
 
@@ -35,7 +35,7 @@ class BenCogsMisc:
 
 	async def on_ready(self):
 		if not hasattr(self.bot, 'start_time'):
-			self.bot.start_time = datetime.utcnow()
+			self.bot.start_time = time.monotonic()
 
 	@command(aliases=['license'])
 	async def copyright(self, context):
@@ -49,16 +49,13 @@ class BenCogsMisc:
 
 	def uptime(self, *, brief=False):
 		try:
-			seconds = (datetime.utcnow() - self.bot.start_time).total_seconds()
+			seconds = time.monotonic() - self.bot.start_time
 		except AttributeError:
 			if brief:
 				return 'Not up yet'
 			return "I'm not up yet."
 
-		if seconds < 1:
-			natural_time = '0 seconds'
-		else:
-			natural_time = self.natural_time(round(seconds))
+		natural_time = self.natural_time(math.floor(seconds))
 
 		if brief:
 			return natural_time
@@ -67,6 +64,9 @@ class BenCogsMisc:
 
 	@classmethod
 	def natural_time(cls, seconds: int):
+		if not seconds:
+			return '0 seconds'
+
 		split = cls.split_seconds(round(seconds))
 		words = zip(('week', 'day', 'hour', 'minute', 'second'), split)
 
@@ -94,7 +94,7 @@ class BenCogsMisc:
 		# does not cancel the typing
 		# also apparently we can always trigger typing in DMs
 		# even if they blocked us
-		rtt = await self.timeit(context.author.trigger_typing())
+		rtt, _ = await self.timeit(context.author.trigger_typing())
 		await context.send(f'🏓 Pong! │{rtt}ms')
 
 	@command(hidden=True)
@@ -106,12 +106,13 @@ class BenCogsMisc:
 		# due to loose snowflake ordering, we time travelled
 		# so leave the reply message alone
 
-	async def timeit(self, coro):
+	@staticmethod
+	async def timeit(coro, _timer=time.perf_counter):
 		"""return how long it takes to await coro, in milliseconds"""
-		t0 = time.perf_counter()
-		await coro
-		t1 = time.perf_counter()
-		return round((t1-t0)*1000)
+		t0 = _timer()
+		result = await coro
+		t1 = _timer()
+		return round((t1 - t0) * 1000), result
 
 # maintain alias for backwards compatibility of subclasses
 class Misc(BenCogsMisc):
