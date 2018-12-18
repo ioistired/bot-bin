@@ -5,39 +5,38 @@ import json
 import logging
 import sys
 import traceback
+import urllib
 
 import aiohttp
 from discord.ext import commands
 
-"""A simple stats cog, for use with several bot lists.
-Make sure your bot.config['tokens']['stats'] has a key
-which maps each domain name to either null or a token.
-"""
-
 logger = logging.getLogger('stats')
 
-
 class BenCogsStats:
-	# credit to @Tom™#7887 (ID 248294452307689473) on the Discord Bots List guild
-	# for much of this
+	"""A simple stats cog, for use with several bot lists.
+	Make sure your bot.config['tokens']['stats'] has a key
+	which maps each domain name to either None or a token.
+	"""
 
-	API_URLS = {
-		'bots.discord.pw':    'https://bots.discord.pw/api/bots/{}/stats',
-		'discordbots.org':    'https://discordbots.org/api/bots/{}/stats',
-		'botsfordiscord.com': 'https://botsfordiscord.com/api/v1/bots/{}',
+	API_FORMATS = {
+		urllib.parse.urlparse(url).netloc: (url, parameter_name)
+		for url, parameter_name in (
+			('https://discord.bots.gg/api/v1/bots/{}/stats', 'guildCount'),
+			('https://discordbots.org/api/bots/{}/stats', 'server_count'),
+			('https://botsfordiscord.com/api/v1/bots/{}', 'server_count'),
+		)
 	}
 
 	def __init__(self, bot):
 		self.bot = bot
-		self.session = aiohttp.ClientSession(loop=bot.loop)
+		self.session = aiohttp.ClientSession(loop=self.bot.loop)
 		self.config = self.bot.config['tokens']['stats']
 
-		self.configured_apis = []
-		for config_key in self.API_URLS:
-			if self.config.get(config_key) is None:
-				logger.warning(f"{config_key} was not loaded! Please make sure it's configured correctly.")
-			else:
-				self.configured_apis.append(config_key)
+		self.configured_apis = [
+			config_key
+			for config_key in self.API_FORMATS
+			if self.config.get(config_key) is not None
+		]
 
 		self.bot.add_listener(self.send, 'on_ready')
 		for guild_change_event in 'on_guild_join', 'on_guild_remove':
@@ -52,12 +51,13 @@ class BenCogsStats:
 		await self.notify_owner()
 
 		for config_key in self.configured_apis:
-			url = self.API_URLS[config_key].format(self.bot.user.id)
-			data = json.dumps({'server_count': await self.guild_count()})
+			url, parameter_name = self.API_FORMATS[config_key]
+			url = url.format(self.bot.user.id)
+			data = json.dumps({parameter_name: await self.guild_count()})
 			headers = {'Authorization': self.config[config_key], 'Content-Type': 'application/json'}
 
 			async with self.session.post(url, data=data, headers=headers) as resp:
-				if resp.status // 100 == 2:  # 2xx codes are success
+				if resp.status in range(200, 300):
 					logger.info('%s response: %s', config_key, await resp.text())
 				else:
 					logger.warning('%s failed with status code %s', config_key, resp.status)
@@ -77,10 +77,9 @@ class BenCogsStats:
 		# also typically a bot is in a few guilds for testing (test server + DBL + discord.pw),
 		# so ignore 4 guilds
 		if guild_count > 4 and guild_count & (guild_count - 1) == 0:
-			await self._get_owner().send(f'Guild count ({guild_count}) is a power of 2!')
+			await self.owner().send(f'Guild count ({guild_count}) is a power of 2!')
 
-	def _get_owner(self):
-		"""Get the bot's owner as a discord.py User object."""
+	def owner(self) -> discord.User:
 		owner_id = int(self.bot.config.get('send_logs_to', self.bot.owner_id))
 		return self.bot.get_user(owner_id)
 
