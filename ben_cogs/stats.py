@@ -79,7 +79,7 @@ class BenCogsStats:
 		if guild_count > 4 and guild_count & (guild_count - 1) == 0:
 			await self.owner().send(f'Guild count ({guild_count}) is a power of 2!')
 
-	def owner(self) -> discord.User:
+	def owner(self) -> 'discord.User':
 		owner_id = int(self.bot.config.get('send_logs_to', self.bot.owner_id))
 		return self.bot.get_user(owner_id)
 
