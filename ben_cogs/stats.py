@@ -19,11 +19,11 @@ class BenCogsStats:
 	"""
 
 	API_FORMATS = {
-		urllib.parse.urlparse(url).netloc: (url, parameter_name)
-		for url, parameter_name in (
-			('https://discord.bots.gg/api/v1/bots/{}/stats', 'guildCount'),
-			('https://discordbots.org/api/bots/{}/stats', 'server_count'),
-			('https://botsfordiscord.com/api/v1/bots/{}', 'server_count'),
+		urllib.parse.urlparse(url).netloc: url
+		for url in (
+			'https://discord.bots.gg/api/v1/bots/{}/stats',
+			'https://discordbots.org/api/bots/{}/stats',
+			'https://botsfordiscord.com/api/v1/bots/{}',
 		)
 	}
 
@@ -51,9 +51,8 @@ class BenCogsStats:
 		await self.notify_owner()
 
 		for config_key in self.configured_apis:
-			url, parameter_name = self.API_FORMATS[config_key]
-			url = url.format(self.bot.user.id)
-			data = json.dumps({parameter_name: await self.guild_count()})
+			url = self.API_FORMATS[config_key].format(self.bot.user.id)
+			data = json.dumps({'server_count': await self.guild_count()})
 			headers = {'Authorization': self.config[config_key], 'Content-Type': 'application/json'}
 
 			async with self.session.post(url, data=data, headers=headers) as resp:
