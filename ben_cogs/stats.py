@@ -10,7 +10,7 @@ import urllib
 import aiohttp
 from discord.ext import commands
 
-logger = logging.getLogger('stats')
+logger = logging.getLogger(__name__)
 
 class BenCogsStats:
 	"""A simple stats cog, for use with several bot lists.
