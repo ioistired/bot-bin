@@ -61,6 +61,7 @@ class BenCogsStats:
 					logger.info('%s response: %s', config_key, await resp.text())
 				else:
 					logger.warning('%s failed with status code %s', config_key, resp.status)
+					logger.warning('response data: %s', await resp.text())
 
 	async def notify_owner(self):
 		"""Notify the owner of the bot if the guild count is large."""
