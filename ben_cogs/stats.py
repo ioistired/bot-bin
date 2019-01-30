@@ -24,6 +24,7 @@ class BenCogsStats:
 			'https://discord.bots.gg/api/v1/bots/{}/stats',
 			'https://discordbots.org/api/bots/{}/stats',
 			'https://botsfordiscord.com/api/v1/bots/{}',
+			'https://lbots.org/api/v1/bots/{}/stats',
 		)
 	}
 
