@@ -7,12 +7,12 @@ import os.path
 import time
 
 import discord
-from discord.ext.commands import command
+from discord.ext import commands
 import inflect
 
 inflect = inflect.engine()
 
-class BenCogsMisc:
+class BenCogsMisc(commands.Cog):
 	"""Miscellaneous commands that don't belong in any other category"""
 
 	def __init__(self, bot):
@@ -33,16 +33,17 @@ class BenCogsMisc:
 		with open(self.bot.config['copyright_license_file']) as f:
 			self.license_message = f.read()
 
+	@commands.Cog.listener()
 	async def on_ready(self):
 		if not hasattr(self.bot, 'start_time'):
 			self.bot.start_time = time.monotonic()
 
-	@command(aliases=['license'])
+	@commands.command(aliases=['license'])
 	async def copyright(self, context):
 		"""Tells you about the copyright license for the bot"""
 		await context.send(self.license_message)
 
-	@command(name='uptime')
+	@commands.command(name='uptime')
 	async def uptime_command(self, context):
 		"""Shows you how long the bot has been online."""
 		await context.send(self.uptime())
@@ -86,7 +87,7 @@ class BenCogsMisc:
 		# ie a week is always 7 days, but a month is not always 4 weeks.
 		return weeks, days, hours, minutes, seconds
 
-	@command()
+	@commands.command()
 	async def ping(self, context):
 		"""Shows the bots latency to Discord's servers"""
 		# trigger typing in DMs to minimize disruption
@@ -97,7 +98,7 @@ class BenCogsMisc:
 		rtt, _ = await self.timeit(context.author.trigger_typing())
 		await context.send(f'🏓 Pong! │{rtt}ms')
 
-	@command(hidden=True)
+	@commands.command(hidden=True)
 	async def pong(self, context):
 		reply = await context.send('Ping')
 		if context.message.created_at < reply.created_at:

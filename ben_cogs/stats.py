@@ -12,7 +12,7 @@ from discord.ext import commands
 
 logger = logging.getLogger(__name__)
 
-class BenCogsStats:
+class BenCogsStats(commands.Cog):
 	"""A simple stats cog, for use with several bot lists.
 	Make sure your bot.config['tokens']['stats'] has a key
 	which maps each domain name to either None or a token.
@@ -43,7 +43,7 @@ class BenCogsStats:
 		for guild_change_event in 'on_guild_join', 'on_guild_remove':
 			self.bot.add_listener(self.on_guild_change, guild_change_event)
 
-	def __unload(self):
+	def cog_unload(self):
 		self.bot.loop.create_task(self.session.close())
 
 	async def send(self):

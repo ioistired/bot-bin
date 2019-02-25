@@ -23,11 +23,11 @@ def command(*args, **kwargs):
 # License: https://github.com/khazhyk/dango.py/blob/512c76eca8309cb5c311fc2d961e3defa1ccbd9e/LICENSE
 # Debug plugin code: https://github.com/khazhyk/dango.py/blob/512c76eca8309cb5c311fc2d961e3defa1ccbd9e/plugins/debug.py
 
-class BenCogsDebug:
+class BenCogsDebug(commands.Cog):
 	def __init__(self):
 		self.process = psutil.Process()
 
-	async def __local_check(self, context):
+	async def cog_check(self, context):
 		if not await context.bot.is_owner(context.author):
 			raise commands.NotOwner
 		return True
@@ -71,7 +71,6 @@ class BenCogsDebug:
 		return humanize.naturalsize(self.process.memory_full_info().uss, binary=base1024)
 
 # maintain alias for backwards compatibility of subclasses
-# we use a dummy class to update __name__
 class Debug(BenCogsDebug):
 	pass
 
