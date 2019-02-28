@@ -39,13 +39,10 @@ class BenCogsStats(commands.Cog):
 			if self.config.get(config_key) is not None
 		]
 
-		self.bot.add_listener(self.send, 'on_ready')
-		for guild_change_event in 'on_guild_join', 'on_guild_remove':
-			self.bot.add_listener(self.on_guild_change, guild_change_event)
-
 	def cog_unload(self):
 		self.bot.loop.create_task(self.session.close())
 
+	@commands.Cog.listener(name='on_ready')
 	async def send(self):
 		"""send guild counts to the API gateways."""
 
@@ -95,6 +92,8 @@ class BenCogsStats(commands.Cog):
 		await self.send()
 		await context.message.add_reaction('\N{white heavy check mark}')
 
+	@commands.Cog.listener(name='on_guild_join')
+	@commands.Cog.listener(name='on_guild_remove')
 	async def on_guild_change(self, _):
 		await self.send()
 
