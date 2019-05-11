@@ -7,9 +7,6 @@ from setuptools import setup
 with open('ben_cogs/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
-with open('requirements.txt') as f:
-	dependency_links = [line for line in f if not line.lstrip().startswith('#')]
-
 setup(
 	name='ben_cogs',
 	author='bmintz',
@@ -19,9 +16,8 @@ setup(
 	download_url='https://github.com/bmintz/cogs/archive/{}.tar.gz'.format(version),
 	version=version,
 	packages=['ben_cogs'],
-	dependency_links=dependency_links,
 	install_requires=[
-		'discord.py>=1.0.0a1699',
+		'discord.py>=1.1.0,<2.0.0',
 		'humanize',
 		'inflect',
 		'jishaku>=1.6.1,<2.0.0',
