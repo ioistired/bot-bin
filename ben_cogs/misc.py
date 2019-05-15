@@ -12,6 +12,34 @@ import inflect
 
 inflect = inflect.engine()
 
+def natural_time(seconds: int):
+	if not seconds:
+		return '0 seconds'
+
+	split = split_seconds(round(seconds))
+	words = zip(('week', 'day', 'hour', 'minute', 'second'), split)
+
+	return inflect.join([pluralize(word, value) for word, value in words if value])
+
+def pluralize(word, value):
+	return f'{value} {inflect.plural_noun(word, value)}'
+
+def split_seconds(seconds: int):
+	minutes, seconds = divmod(seconds, 60)
+	hours, minutes = divmod(minutes, 60)
+	days, hours = divmod(hours, 24)
+	weeks, days = divmod(days, 7)
+	# we stop at weeks because that is the largest unit that we can divide exactly
+	# ie a week is always 7 days, but a month is not always 4 weeks.
+	return weeks, days, hours, minutes, seconds
+
+async def timeit(coro, _timer=time.perf_counter):
+	"""return how long it takes to await coro, in milliseconds"""
+	t0 = _timer()
+	result = await coro
+	t1 = _timer()
+	return round((t1 - t0) * 1000), result
+
 class BenCogsMisc(commands.Cog):
 	"""Miscellaneous commands that don't belong in any other category"""
 
@@ -54,36 +82,17 @@ class BenCogsMisc(commands.Cog):
 				return 'Not up yet'
 			return "I'm not up yet."
 
-		natural_time = self.natural_time(math.floor(seconds))
+		natural_time = natural_time(math.floor(seconds))
 
 		if brief:
 			return natural_time
 		else:
 			return f"I've been up for {natural_time}."
 
-	@classmethod
-	def natural_time(cls, seconds: int):
-		if not seconds:
-			return '0 seconds'
-
-		split = cls.split_seconds(round(seconds))
-		words = zip(('week', 'day', 'hour', 'minute', 'second'), split)
-
-		return inflect.join([cls.pluralize(word, value) for word, value in words if value])
-
-	@staticmethod
-	def pluralize(word, value):
-		return f'{value} {inflect.plural_noun(word, value)}'
-
-	@staticmethod
-	def split_seconds(seconds: int):
-		minutes, seconds = divmod(seconds, 60)
-		hours, minutes = divmod(minutes, 60)
-		days, hours = divmod(hours, 24)
-		weeks, days = divmod(days, 7)
-		# we stop at weeks because that is the largest unit that we can divide exactly
-		# ie a week is always 7 days, but a month is not always 4 weeks.
-		return weeks, days, hours, minutes, seconds
+	# maintain backwards compatibility
+	natural_time = staticmethod(natural_time)
+	pluralize = staticmethod(pluralize)
+	split_seconds = staticmethod(split_seconds)
 
 	@commands.command()
 	async def ping(self, context):
@@ -93,7 +102,7 @@ class BenCogsMisc(commands.Cog):
 		# does not cancel the typing
 		# also apparently we can always trigger typing in DMs
 		# even if they blocked us
-		rtt, _ = await self.timeit(context.author.trigger_typing())
+		rtt, _ = await timeit(context.author.trigger_typing())
 		await context.send(f'🏓 Pong! │{rtt}ms')
 
 	@commands.command(hidden=True)
@@ -105,13 +114,7 @@ class BenCogsMisc(commands.Cog):
 		# due to loose snowflake ordering, we time travelled
 		# so leave the reply message alone
 
-	@staticmethod
-	async def timeit(coro, _timer=time.perf_counter):
-		"""return how long it takes to await coro, in milliseconds"""
-		t0 = _timer()
-		result = await coro
-		t1 = _timer()
-		return round((t1 - t0) * 1000), result
+	timeit = staticmethod(timeit)
 
 # maintain alias for backwards compatibility of subclasses
 class Misc(BenCogsMisc):
