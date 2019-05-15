@@ -26,11 +26,9 @@ class BenCogsMisc(commands.Cog):
 			return
 
 		if not filename or not os.path.isfile(filename):
-			with contextlib.suppress(AttributeError):
-				del type(self).copyright
 			return
 
-		with open(self.bot.config['copyright_license_file']) as f:
+		with open(filename) as f:
 			self.license_message = f.read()
 
 	@commands.Cog.listener()
@@ -120,4 +118,7 @@ class Misc(BenCogsMisc):
 	pass
 
 def setup(bot):
-	bot.add_cog(BenCogsMisc(bot))
+	cog = BenCogsMisc(bot)
+	bot.add_cog(cog)
+	if not hasattr(cog, 'license_message'):
+		bot.remove_command('copyright')
