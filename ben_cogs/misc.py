@@ -82,12 +82,12 @@ class BenCogsMisc(commands.Cog):
 				return 'Not up yet'
 			return "I'm not up yet."
 
-		natural_time = natural_time(math.floor(seconds))
+		humanized = natural_time(math.floor(seconds))
 
 		if brief:
-			return natural_time
+			return humanized
 		else:
-			return f"I've been up for {natural_time}."
+			return f"I've been up for {humanized}."
 
 	# maintain backwards compatibility
 	natural_time = staticmethod(natural_time)
