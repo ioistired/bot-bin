@@ -1,16 +1,27 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 
+import collections
 import contextlib
 import math
 import os.path
 import time
+from typing import Awaitable, Sequence, T, Tuple, Union
 
 import discord
 from discord.ext import commands
 import inflect
+try:
+	from prettytable import PrettyTable
+except ImportError:
+	HAVE_PRETTYTABLE = False
+else:
+	HAVE_PRETTYTABLE = True
 
 inflect = inflect.engine()
+
+def codeblock(s, *, lang=''):
+	return f'```{lang}\n{s}```'
 
 def natural_time(seconds: int):
 	if not seconds:
@@ -33,12 +44,34 @@ def split_seconds(seconds: int):
 	# ie a week is always 7 days, but a month is not always 4 weeks.
 	return weeks, days, hours, minutes, seconds
 
-async def timeit(coro, _timer=time.perf_counter):
-	"""return how long it takes to await coro, in milliseconds"""
+async def timeit(coro: Awaitable[T], _timer=time.perf_counter) -> Tuple[float, T]:
+	"""return how long it takes to await coro, in seconds, and its result"""
 	t0 = _timer()
 	result = await coro
 	t1 = _timer()
-	return round((t1 - t0) * 1000), result
+	return t1 - t0, result
+
+if HAVE_PRETTYTABLE:
+	class PrettyTable(PrettyTable):
+		"""an extension of PrettyTable that works with asyncpg's Records and looks better"""
+		def __init__(self, rows: Sequence[Union['asyncpg.Record', collections.OrderedDict]], **options):
+			defaults = dict(
+				# super()'s default is ASCII | - +, which don't join seamlessly and look p bad
+				vertical_char='│',
+				horizontal_char='─',
+				junction_char='┼')
+			for option, default in defaults.items():
+				options.setdefault(option, default)
+
+			if rows:
+				super().__init__(rows[0].keys(), **options)
+			else:
+				super().__init__()
+			# PrettyTable's constructor does not set this property for some reason
+			self.align = options.get('align', 'l')	# left align
+
+			for row in rows:
+				self.add_row(row)
 
 class BenCogsMisc(commands.Cog):
 	"""Miscellaneous commands that don't belong in any other category"""
@@ -103,6 +136,7 @@ class BenCogsMisc(commands.Cog):
 		# also apparently we can always trigger typing in DMs
 		# even if they blocked us
 		rtt, _ = await timeit(context.author.trigger_typing())
+		rtt = round(rtt * 1000)
 		await context.send(f'🏓 Pong! │{rtt}ms')
 
 	@commands.command(hidden=True)

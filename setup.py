@@ -17,12 +17,16 @@ setup(
 	version=version,
 	packages=['ben_cogs'],
 	install_requires=[
-		'discord.py>=1.1.0,<2.0.0',
+		'discord.py>=1.1.1,<2.0.0',
 		'humanize',
 		'inflect',
 		'jishaku>=1.6.1,<2.0.0',
 		'objgraph',
 		'psutil'],
+	extras_require={
+		'sql': [
+			'asyncpg',
+			'prettytable']},
 	python_requires='>=3.6.0',
 	license='MIT',
 	classifiers=[
