@@ -48,4 +48,6 @@ class BenCogsSql(commands.Cog):
 		await context.send(f'{message}\n*Retrieved in {elapsed}ms.*')
 
 def setup(bot):
+	if bot.case_insensitive:
+		BenCogsSql.sql_command.aliases.clear()
 	bot.add_cog(BenCogsSql(bot.pool))
