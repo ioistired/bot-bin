@@ -1,9 +1,5 @@
-#!/usr/bin/env python3
-# encoding: utf-8
-
 import asyncio
-import contextlib
-import copy
+import functools
 import io
 
 import discord
@@ -12,18 +8,9 @@ import humanize
 import objgraph
 import psutil
 
-# ensure all commands in this module are hidden
-# since there is no default way to hide an entire cog
-def command(*args, **kwargs):
-	kwargs['hidden'] = True
-	return commands.command(*args, **kwargs)
+from .misc import codeblock
 
-# using code provided by khazhyk under the MIT License
-# Copyright © 2017 khazhyk
-# License: https://github.com/khazhyk/dango.py/blob/512c76eca8309cb5c311fc2d961e3defa1ccbd9e/LICENSE
-# Debug plugin code: https://github.com/khazhyk/dango.py/blob/512c76eca8309cb5c311fc2d961e3defa1ccbd9e/plugins/debug.py
-
-class BenCogsDebug(commands.Cog):
+class BenCogsDebug(commands.Cog, command_attrs=dict(hidden=True)):
 	def __init__(self):
 		self.process = psutil.Process()
 
@@ -32,34 +19,22 @@ class BenCogsDebug(commands.Cog):
 			raise commands.NotOwner
 		return True
 
-	@commands.command(aliases=('su', 'sudo'))
-	async def runas(self, context, who: discord.User, *, cmd):
-		"""Run a command impersonating another user."""
-		fake_message = copy.copy(context.message)
-
-		# Message._update handles clearing cached properties
-		fake_message._update(context.channel, dict(
-			content=context.prefix + cmd))
-		fake_message.author = who
-		new_context = await context.bot.get_context(fake_message)
-		await context.bot.invoke(new_context)
-
-	@command(name='most-common-types')
+	@commands.command(name='most-common-types')
 	async def most_common_types(self, context):
-		await context.send(str(await context.bot.loop.run_in_executor(None, objgraph.most_common_types)))
+		await context.send(codeblock(await self.objgraph_show(objgraph.show_most_common_types)))
 
-	@command()
+	@commands.command()
 	async def objgrowth(self, context):
 		"""Show the increase in peak object counts since last call."""
+		await context.send(codeblock(await self.objgraph_show(objgraph.show_growth)))
 
-		stdout = io.StringIO()
+	async def objgraph_show(self, fn):
+		out = io.StringIO()
+		fn = functools.partial(fn, file=out)
+		await context.bot.loop.run_in_executor(None, fn)
+		return out.read()
 
-		with contextlib.redirect_stdout(stdout):
-			await context.bot.loop.run_in_executor(None, objgraph.show_growth)
-
-		await context.send(f'```{stdout.getvalue()}```')
-
-	@command()
+	@commands.command()
 	async def mem(self, context, base1024: bool = False):
 		"""current memory usage
 
