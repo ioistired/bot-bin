@@ -131,7 +131,7 @@ class BenCogsMisc(commands.Cog):
 	async def ping(self, context):
 		"""Shows the bots latency to Discord's servers"""
 		latency = round(self.bot.latency * 1000, 2)
-		await context.send(f'🏓 Pong! │Average websocket latency: {latency}ms')
+		await context.send(f'🏓 Pong!│Average websocket latency: {latency}ms')
 
 	@commands.command(hidden=True)
 	async def pong(self, context):
