@@ -130,14 +130,8 @@ class BenCogsMisc(commands.Cog):
 	@commands.command()
 	async def ping(self, context):
 		"""Shows the bots latency to Discord's servers"""
-		# trigger typing in DMs to minimize disruption
-		# as sometimes a low enough ping means that the reply message
-		# does not cancel the typing
-		# also apparently we can always trigger typing in DMs
-		# even if they blocked us
-		rtt, _ = await timeit(context.author.trigger_typing())
-		rtt = round(rtt * 1000)
-		await context.send(f'🏓 Pong! │{rtt}ms')
+		latency = round(self.bot.latency * 1000, 2)
+		await context.send(f'🏓 Pong! │Average websocket latency: {latency}ms')
 
 	@commands.command(hidden=True)
 	async def pong(self, context):
