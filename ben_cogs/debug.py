@@ -128,7 +128,7 @@ class BenCogsDebug(commands.Cog, command_attrs=dict(hidden=True)):
 			end = time.perf_counter()
 			success = '✅'
 
-		await context.send(f'Status: success Time: {(end - start) * 1000:.2f}ms')
+		await context.send(f'Status: {success} Time: {(end - start) * 1000:.2f}ms')
 
 
 # maintain alias for backwards compatibility of subclasses
