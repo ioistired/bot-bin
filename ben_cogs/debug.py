@@ -1,6 +1,9 @@
 import asyncio
+import copy
 import functools
 import io
+import time
+import traceback
 
 import discord
 from discord.ext import commands
@@ -9,6 +12,52 @@ import objgraph
 import psutil
 
 from .misc import codeblock
+
+# Code provided by Rapptz under the MIT License
+# © 2015 Rapptz
+# https://github.com/Rapptz/RoboDanny/blob/d3148649ba504dcb6ca5499421bd397419ce7c1d/cogs/admin.py
+class PerformanceMocker:
+	"""A mock object that can also be used in await expressions."""
+
+	def __init__(self):
+		self.loop = asyncio.get_event_loop()
+
+	def permissions_for(self, obj):
+		# Lie and say we don't have permissions to embed
+		# This makes it so pagination sessions just abruptly end on __init__
+		# Most checks based on permission have a bypass for the owner anyway
+		# So this lie will not affect the actual command invocation.
+		perms = discord.Permissions.all()
+		perms.administrator = False
+		perms.embed_links = False
+		perms.add_reactions = False
+		return perms
+
+	def __getattr__(self, attr):
+		return self
+
+	def __call__(self, *args, **kwargs):
+		return self
+
+	def __repr__(self):
+		return '<PerformanceMocker>'
+
+	def __await__(self):
+		future = self.loop.create_future()
+		future.set_result(self)
+		return future.__await__()
+
+	async def __aenter__(self):
+		return self
+
+	async def __aexit__(self, *args):
+		return self
+
+	def __len__(self):
+		return 0
+
+	def __bool__(self):
+		return False
 
 class BenCogsDebug(commands.Cog, command_attrs=dict(hidden=True)):
 	def __init__(self):
@@ -44,6 +93,43 @@ class BenCogsDebug(commands.Cog, command_attrs=dict(hidden=True)):
 
 	def memory_usage(self, *, base1024=False):
 		return humanize.naturalsize(self.process.memory_full_info().uss, binary=base1024)
+
+	# Code provided by Rapptz under the MIT License
+	# © 2015 Rapptz
+	# https://github.com/Rapptz/RoboDanny/blob/d3148649ba504dcb6ca5499421bd397419ce7c1d/cogs/admin.py
+	@commands.command()
+	async def perf(self, context, *, command):
+		"""Checks the timing of a command, attempting to suppress HTTP and DB calls."""
+
+		msg = copy.copy(context.message)
+		msg.content = context.prefix + command
+
+		new_context = await context.bot.get_context(msg, cls=type(context))
+		new_context._db = PerformanceMocker()
+
+		# Intercepts the Messageable interface a bit
+		new_context._state = PerformanceMocker()
+		new_context.channel = PerformanceMocker()
+
+		if new_context.command is None:
+			return await context.send('No command found')
+
+		start = time.perf_counter()
+		try:
+			await new_context.command.invoke(new_context)
+		except commands.CommandError:
+			end = time.perf_counter()
+			success = '❌'
+			try:
+				await context.send(f'```py\n{traceback.format_exc()}\n```')
+			except discord.HTTPException:
+				pass
+		else:
+			end = time.perf_counter()
+			success = '✅'
+
+		await context.send(f'Status: success Time: {(end - start) * 1000:.2f}ms')
+
 
 # maintain alias for backwards compatibility of subclasses
 class Debug(BenCogsDebug):
