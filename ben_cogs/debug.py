@@ -99,13 +99,12 @@ class BenCogsDebug(commands.Cog, command_attrs=dict(hidden=True)):
 	# https://github.com/Rapptz/RoboDanny/blob/d3148649ba504dcb6ca5499421bd397419ce7c1d/cogs/admin.py
 	@commands.command()
 	async def perf(self, context, *, command):
-		"""Checks the timing of a command, attempting to suppress HTTP and DB calls."""
+		"""Checks the timing of a command, attempting to suppress HTTP calls."""
 
 		msg = copy.copy(context.message)
 		msg.content = context.prefix + command
 
 		new_context = await context.bot.get_context(msg, cls=type(context))
-		new_context._db = PerformanceMocker()
 
 		# Intercepts the Messageable interface a bit
 		new_context._state = PerformanceMocker()
