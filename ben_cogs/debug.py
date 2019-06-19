@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 import copy
 import functools
 import io
@@ -119,10 +120,8 @@ class BenCogsDebug(commands.Cog, command_attrs=dict(hidden=True)):
 		except commands.CommandError:
 			end = time.perf_counter()
 			success = '❌'
-			try:
+			with contextlib.suppress(discord.HTTPException):
 				await context.send(f'```py\n{traceback.format_exc()}\n```')
-			except discord.HTTPException:
-				pass
 		else:
 			end = time.perf_counter()
 			success = '✅'
