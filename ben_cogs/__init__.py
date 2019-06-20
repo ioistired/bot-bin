@@ -3,3 +3,5 @@ __author__		= 'bmintz'
 __license__		= 'MIT'
 __copyright__ 	= 'Copyright © 2018–2019 Benjamin Mintz'
 __version__ 	= '0.12.1'
+
+from .bot import BenCogsBot
