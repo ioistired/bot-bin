@@ -28,7 +28,7 @@ def natural_time(seconds: int):
 		return '0 seconds'
 
 	split = split_seconds(round(seconds))
-	words = zip(('week', 'day', 'hour', 'minute', 'second'), split)
+	words = zip(('day', 'hour', 'minute', 'second'), split)
 
 	return inflect.join([pluralize(word, value) for word, value in words if value])
 
@@ -39,10 +39,8 @@ def split_seconds(seconds: int):
 	minutes, seconds = divmod(seconds, 60)
 	hours, minutes = divmod(minutes, 60)
 	days, hours = divmod(hours, 24)
-	weeks, days = divmod(days, 7)
-	# we stop at weeks because that is the largest unit that we can divide exactly
-	# ie a week is always 7 days, but a month is not always 4 weeks.
-	return weeks, days, hours, minutes, seconds
+	# no more perfectly divisible units after here (except weeks which we don't want)
+	return days, hours, minutes, seconds
 
 async def timeit(coro: Awaitable[T], _timer=time.perf_counter) -> Tuple[float, T]:
 	"""return how long it takes to await coro, in seconds, and its result"""
