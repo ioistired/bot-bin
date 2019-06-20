@@ -45,7 +45,8 @@ class BenCogsBot(commands.AutoShardedBot):
 			prefixes = self.config['prefixes']
 		except KeyError:
 			return None
-		return discord.Game(name=prefixes[0] + 'help')
+
+		return prefixes and discord.Game(name=prefixes[0] + 'help')
 
 	def get_prefix_(self, bot, message):
 		match = self.prefix_re.search(message.content)
