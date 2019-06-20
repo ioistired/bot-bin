@@ -109,6 +109,9 @@ class BenCogsDebug(commands.Cog, command_attrs=dict(hidden=True)):
 
 		# Intercepts the Messageable interface a bit
 		new_context._state = PerformanceMocker()
+		new_context._author = PerformanceMocker()
+		new_context.message._state = PerformanceMocker()
+		new_context.message.channel = PerformanceMocker()
 		new_context.channel = PerformanceMocker()
 
 		if new_context.command is None:
