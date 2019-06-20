@@ -10,7 +10,6 @@ from typing import Awaitable, Sequence, T, Tuple, Union
 
 import discord
 from discord.ext import commands
-import inflect
 try:
 	from prettytable import PrettyTable
 except ImportError:
@@ -18,22 +17,17 @@ except ImportError:
 else:
 	HAVE_PRETTYTABLE = True
 
-inflect = inflect.engine()
-
 def codeblock(s, *, lang=''):
 	return f'```{lang}\n{s}```'
 
-def natural_time(seconds: int):
+def natural_time(seconds: int, *, accuracy=2):
 	if not seconds:
 		return '0 seconds'
 
 	split = split_seconds(round(seconds))
 	words = zip(('day', 'hour', 'minute', 'second'), split)
-
-	return inflect.join([pluralize(word, value) for word, value in words if value])
-
-def pluralize(word, value):
-	return f'{value} {inflect.plural_noun(word, value)}'
+	pluralized = [format(plural(value), word) for word, value in words if value][:accuracy]
+	return human_join(pluralized)
 
 def split_seconds(seconds: int):
 	minutes, seconds = divmod(seconds, 60)
@@ -41,6 +35,34 @@ def split_seconds(seconds: int):
 	days, hours = divmod(hours, 24)
 	# no more perfectly divisible units after here (except weeks which we don't want)
 	return days, hours, minutes, seconds
+
+# pliral and human_join use code provided by Rapptz under the MIT License
+# © 2015 Rapptz
+# https://github.com/Rapptz/RoboDanny/blob/6fd16002e0cbd3ed68bf5a8db10d61658b0b9d51/cogs/utils/formats.py
+
+class plural:
+    def __init__(self, value):
+        self.value = value
+    def __format__(self, format_spec):
+        v = self.value
+        singular, sep, plural = format_spec.partition('|')
+        plural = plural or f'{singular}s'
+        if abs(v) != 1:
+            return f'{v} {plural}'
+        return f'{v} {singular}'
+
+def human_join(seq, sep=', ', conj='and'):
+    size = len(seq)
+    if size == 0:
+        return ''
+
+    if size == 1:
+        return seq[0]
+
+    if size == 2:
+        return f'{seq[0]} {conj} {seq[1]}'
+
+    return sep.join(seq[:-1]) + f' {conj} {seq[-1]}'
 
 async def timeit(coro: Awaitable[T], _timer=time.perf_counter) -> Tuple[float, T]:
 	"""return how long it takes to await coro, in seconds, and its result"""
@@ -122,7 +144,6 @@ class BenCogsMisc(commands.Cog):
 
 	# maintain backwards compatibility
 	natural_time = staticmethod(natural_time)
-	pluralize = staticmethod(pluralize)
 	split_seconds = staticmethod(split_seconds)
 
 	@commands.command()

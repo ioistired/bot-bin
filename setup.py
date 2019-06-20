@@ -18,7 +18,6 @@ setup(
 	install_requires=[
 		'discord.py>=1.1.1,<2.0.0',
 		'humanize',
-		'inflect',
 		'jishaku>=1.6.1,<2.0.0',
 		'objgraph',
 		'psutil'],
