@@ -1,4 +1,3 @@
-import asyncio
 import contextlib
 import copy
 import functools
@@ -19,9 +18,6 @@ from .misc import codeblock
 # https://github.com/Rapptz/RoboDanny/blob/d3148649ba504dcb6ca5499421bd397419ce7c1d/cogs/admin.py
 class PerformanceMocker:
 	"""A mock object that can also be used in await expressions."""
-
-	def __init__(self):
-		self.loop = asyncio.get_event_loop()
 
 	def permissions_for(self, obj):
 		# Lie and say we don't have permissions to embed
@@ -44,9 +40,9 @@ class PerformanceMocker:
 		return '<PerformanceMocker>'
 
 	def __await__(self):
-		future = self.loop.create_future()
-		future.set_result(self)
-		return future.__await__()
+		async def nop():
+			return self
+		return nop().__await__()
 
 	async def __aenter__(self):
 		return self
