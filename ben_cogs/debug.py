@@ -54,7 +54,7 @@ class PerformanceMocker:
 		return self
 
 	async def __aexit__(self, *args):
-		return self
+		pass
 
 	def __len__(self):
 		return 0
