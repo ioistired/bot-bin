@@ -44,6 +44,12 @@ class PerformanceMocker:
 			return self
 		return nop().__await__()
 
+	def __enter__(self):
+		return self
+
+	def __exit__(self, *args):
+		pass
+
 	async def __aenter__(self):
 		return self
 
