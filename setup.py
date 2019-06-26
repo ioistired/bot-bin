@@ -16,7 +16,7 @@ setup(
 	version=version,
 	packages=['ben_cogs'],
 	install_requires=[
-		'discord.py>=1.1.1,<2.0.0',
+		'discord.py>=1.2.3,<2.0.0',
 		'humanize',
 		'objgraph',
 		'psutil'],
