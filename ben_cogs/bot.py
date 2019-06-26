@@ -26,7 +26,7 @@ logger = logging.getLogger('bot')
 class BenCogsBot(commands.AutoShardedBot):
 	def __init__(self, *args, **kwargs):
 		self.config = kwargs.pop('config')
-		self._should_setup_db = kwargs.pop('setup_db')
+		self._should_setup_db = kwargs.pop('setup_db', False)
 		if self._should_setup_db and not HAVE_ASYNCPG:
 			raise ImportError('this bot requires asyncpg but it is not installed')
 		self.process_config()
