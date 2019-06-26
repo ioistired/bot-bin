@@ -5,7 +5,12 @@ import re
 import traceback
 import uuid
 
-import asyncpg
+try:
+	import asyncpg
+except ImportError:
+	HAVE_ASYNCPG = False
+else:
+	HAVE_ASYNCPG = True
 import discord
 from discord.ext import commands
 try:
@@ -22,6 +27,8 @@ class BenCogsBot(commands.AutoShardedBot):
 	def __init__(self, *args, **kwargs):
 		self.config = kwargs.pop('config')
 		self._should_setup_db = kwargs.pop('setup_db')
+		if self._should_setup_db and not HAVE_ASYNCPG:
+			raise ImportError('this bot requires asyncpg but it is not installed')
 		self.process_config()
 		self._fallback_prefix = str(uuid.uuid4())
 
