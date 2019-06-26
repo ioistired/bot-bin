@@ -9,7 +9,12 @@ import discord
 from discord.ext import commands
 import humanize
 import objgraph
-import psutil
+try:
+	import psutil
+except (OSError, ImportError):
+	HAVE_PSUTIL = False
+else:
+	HAVE_PSUTIL = True
 
 from .misc import codeblock
 
@@ -64,7 +69,8 @@ class PerformanceMocker:
 
 class BenCogsDebug(commands.Cog, command_attrs=dict(hidden=True)):
 	def __init__(self):
-		self.process = psutil.Process()
+		if HAVE_PSUTIL:
+			self.process = psutil.Process()
 
 	async def cog_check(self, context):
 		if not await context.bot.is_owner(context.author):
@@ -141,3 +147,8 @@ class Debug(BenCogsDebug):
 
 def setup(bot):
 	bot.add_cog(BenCogsDebug())
+
+	if not HAVE_PSUTIL:
+		for command in 'objgrowth', 'most-common-types', 'mem':
+			bot.remove_command(command)
+
