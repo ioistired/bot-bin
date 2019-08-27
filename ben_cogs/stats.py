@@ -25,6 +25,7 @@ class BenCogsStats(commands.Cog):
 			'https://discordbots.org/api/bots/{}/stats',
 			'https://botsfordiscord.com/api/v1/bots/{}',
 			'https://lbots.org/api/v1/bots/{}/stats',
+			'https://discord.boats/api/v2/bot/{}',
 		)
 	}
 
