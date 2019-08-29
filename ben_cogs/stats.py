@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 
+import asyncio
 import json
 import logging
 import sys
 import traceback
 import urllib
+from typing import Dict
 
 import aiohttp
 from discord.ext import commands
@@ -44,22 +46,30 @@ class BenCogsStats(commands.Cog):
 		self.bot.loop.create_task(self.session.close())
 
 	@commands.Cog.listener(name='on_ready')
-	async def send(self):
-		"""send guild counts to the API gateways."""
+	async def send(self) -> Dict[str, bool]:
+		"""send guild counts to the API gateways. return a dict mapping config keys to HTTP response status codes."""
 
 		await self.notify_owner()
 
+		coros = []
 		for config_key in self.configured_apis:
 			url = self.API_FORMATS[config_key].format(self.bot.user.id)
 			data = json.dumps({'server_count': await self.guild_count()})
 			headers = {'Authorization': self.config[config_key], 'Content-Type': 'application/json'}
 
-			async with self.session.post(url, data=data, headers=headers) as resp:
-				if resp.status in range(200, 300):
-					logger.info('%s response: %s', config_key, await resp.text())
-				else:
-					logger.warning('%s failed with status code %s', config_key, resp.status)
-					logger.warning('response data: %s', await resp.text())
+			async def post():
+				async with self.session.post(url, data=data, headers=headers) as resp:
+					if resp.status in range(200, 300):
+						logger.info('%s response: %s', config_key, await resp.text())
+					else:
+						logger.warning('%s failed with status code %s', config_key, resp.status)
+						logger.warning('response data: %s', await resp.text())
+
+					return config_key, resp.status
+
+			coros.append(post())
+
+		return dict(await asyncio.gather(*coros))
 
 	async def notify_owner(self):
 		"""Notify the owner of the bot if the guild count is large."""
@@ -90,8 +100,14 @@ class BenCogsStats(commands.Cog):
 	@commands.command(name='send-stats', hidden=True)
 	@commands.is_owner()
 	async def send_command(self, context):
-		await self.send()
-		await context.message.add_reaction('\N{white heavy check mark}')
+		statuses = await self.send()
+		if all(status in range(200, 300) for status in statuses.values()):
+			await context.message.add_reaction('✅')
+		else:
+			await context.message.add_reaction('❌')
+			await context.send(
+				'The following APIs failed:'
+				'\n'.join(f'• {config_key}: **{status}**' for config_key, status in statuses.items()))
 
 	@commands.Cog.listener(name='on_guild_join')
 	@commands.Cog.listener(name='on_guild_remove')
