@@ -51,25 +51,21 @@ class BenCogsStats(commands.Cog):
 
 		await self.notify_owner()
 
-		coros = []
-		for config_key in self.configured_apis:
+		async def post(config_key):
 			url = self.API_FORMATS[config_key].format(self.bot.user.id)
 			data = json.dumps({'server_count': await self.guild_count()})
 			headers = {'Authorization': self.config[config_key], 'Content-Type': 'application/json'}
 
-			async def post():
-				async with self.session.post(url, data=data, headers=headers) as resp:
-					if resp.status in range(200, 300):
-						logger.info('%s response: %s', config_key, await resp.text())
-					else:
-						logger.warning('%s failed with status code %s', config_key, resp.status)
-						logger.warning('response data: %s', await resp.text())
+			async with self.session.post(url, data=data, headers=headers) as resp:
+				if resp.status in range(200, 300):
+					logger.info('%s response: %s', config_key, await resp.text())
+				else:
+					logger.warning('%s failed with status code %s', config_key, resp.status)
+					logger.warning('response data: %s', await resp.text())
 
-					return config_key, resp.status
+				return config_key, resp.status
 
-			coros.append(post())
-
-		return dict(await asyncio.gather(*coros))
+		return dict(await asyncio.gather(*(post(config_key) for config_key in self.configured_apis)))
 
 	async def notify_owner(self):
 		"""Notify the owner of the bot if the guild count is large."""
