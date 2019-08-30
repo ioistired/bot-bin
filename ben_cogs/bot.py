@@ -36,8 +36,9 @@ class BenCogsBot(commands.AutoShardedBot):
 			command_prefix=self.get_prefix_,
 			description=self.config.get('description'),
 			help_command=commands.MinimalHelpCommand(),
-			activity=self.activity,
 			*args, **kwargs)
+		# do this after super().__init__ in case initial_activity depends on self.is_ready()
+		self.activity = self.initial_activity()
 
 	def process_config(self):
 		self.owners = set(self.config.get('owners', []))
@@ -46,8 +47,7 @@ class BenCogsBot(commands.AutoShardedBot):
 			for k, v
 			in self.config.get('success_emojis', {False: '❌', True: '✅'}).items()}
 
-	@property
-	def activity(self):
+	def initial_activity(self):
 		try:
 			prefixes = self.config['prefixes']
 		except KeyError:
@@ -88,6 +88,8 @@ class BenCogsBot(commands.AutoShardedBot):
 		logger.info('Logged in as: %s', self.user)
 		logger.info('ID: %s', self.user.id)
 		logger.info(separator)
+		# in case there's an activity that depends on being ready
+		await self.change_presence(activity=self.initial_activity())
 
 	async def on_message(self, message):
 		if self.should_reply(message):
