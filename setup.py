@@ -6,10 +6,15 @@ from setuptools import setup
 with open('bot_bin/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
+with open('README.md') as f:
+	long_description = f.read()
+
 setup(
 	name='bot-bin',
 	author='lambda#0987',
 	description='Shared cogs and utilities for use in Discord bots',
+	long_description=long_description,
+	long_description_content_type='text/markdown',
 	url='https://github.com/bmintz/bot-bin',
 	download_url='https://github.com/bot-bin/cogs/archive/v{}.tar.gz'.format(version),
 	version=version,
