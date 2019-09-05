@@ -67,7 +67,7 @@ class PerformanceMocker:
 	def __bool__(self):
 		return False
 
-class BenCogsDebug(commands.Cog, command_attrs=dict(hidden=True)):
+class BotBinDebug(commands.Cog, command_attrs=dict(hidden=True)):
 	def __init__(self):
 		if HAVE_PSUTIL:
 			self.process = psutil.Process()
@@ -141,14 +141,9 @@ class BenCogsDebug(commands.Cog, command_attrs=dict(hidden=True)):
 		await context.send(f'Status: {success} Time: {(end - start) * 1000:.2f}ms')
 
 
-# maintain alias for backwards compatibility of subclasses
-class Debug(BenCogsDebug):
-	pass
-
 def setup(bot):
-	bot.add_cog(BenCogsDebug())
+	bot.add_cog(BotBinDebug())
 
 	if not HAVE_PSUTIL:
 		for command in 'objgrowth', 'most-common-types', 'mem':
 			bot.remove_command(command)
-

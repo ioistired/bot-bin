@@ -3,7 +3,7 @@ from discord.ext import commands
 
 from .misc import codeblock, timeit, PrettyTable
 
-class BenCogsSql(commands.Cog):
+class BotBinSql(commands.Cog):
 	def __init__(self, pool):
 		self.pool = pool
 
@@ -22,16 +22,18 @@ class BenCogsSql(commands.Cog):
 	@sql_command.command(name='execute', aliases=['e'])
 	async def sql_execute_command(self, context, *, query):
 		"""Execute a SQL query."""
-		elapsed, result = await timeit(self.pool.execute(query.strip('`')))
-		elapsed = round(elapsed * 1000, 2)
+		with timeit as timer:
+			result = await self.pool.execute(query.strip('`'))
+		elapsed = round(timer.elapsed * 1000, 2)
 
 		await context.send(f'`{result}`\n*Executed in {elapsed}ms.*')
 
 	@sql_command.command(name='fetch', aliases=['f'])
 	async def sql_fetch_command(self, context, *, query):
 		"""Get the rows of a SQL query."""
-		elapsed, results = await timeit(self.pool.fetch(query.strip('`')))
-		elapsed = round(elapsed * 1000, 2)
+		with timeit() as timer:
+			results = await self.pool.fetch(query.strip('`'))
+		elapsed = round(timer.elapsed * 1000, 2)
 
 		message = codeblock(str(PrettyTable(results)))
 		await context.send(f'{message}\n*{len(results)} rows retrieved in {elapsed}ms.*')
@@ -39,8 +41,9 @@ class BenCogsSql(commands.Cog):
 	@sql_command.command(name='fetchval', aliases=['fv'])
 	async def sql_fetchval_command(self, context, *, query):
 		"""Get a single value from a SQL query."""
-		elapsed, result = await timeit(self.pool.fetchval(query.strip('`')))
-		elapsed = round(elapsed * 1000, 2)
+		with timeit() as timer:
+			result = await timeit(self.pool.fetchval(query.strip('`')))
+		elapsed = round(timer.elapsed * 1000, 2)
 
 		# fetchval returns a native python result
 		# so its repr is probably python code
@@ -49,5 +52,5 @@ class BenCogsSql(commands.Cog):
 
 def setup(bot):
 	if bot.case_insensitive:
-		BenCogsSql.sql_command.aliases.clear()
-	bot.add_cog(BenCogsSql(bot.pool))
+		BotBinSql.sql_command.aliases.clear()
+	bot.add_cog(BotBinSql(bot.pool))

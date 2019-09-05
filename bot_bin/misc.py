@@ -26,7 +26,7 @@ def absolute_natural_timedelta(seconds: int, *, accuracy=2):
 	split = split_seconds(round(seconds))
 	words = zip(('day', 'hour', 'minute', 'second'), split)
 	pluralized = [format(plural(value), word) for word, value in words if value][:accuracy]
-	return human_join(pluralized)
+	return natural_join(pluralized)
 
 def split_seconds(seconds: int):
 	minutes, seconds = divmod(seconds, 60)
@@ -35,7 +35,7 @@ def split_seconds(seconds: int):
 	# no more perfectly divisible units after here (except weeks which we don't want)
 	return days, hours, minutes, seconds
 
-# plural, human_join, and natural_timedelta use code provided by Rapptz under the MIT License
+# plural, natural_join, and natural_timedelta use code provided by Rapptz under the MIT License
 # © 2015 Rapptz
 # https://github.com/Rapptz/RoboDanny/blob/6fd16002e0cbd3ed68bf5a8db10d61658b0b9d51/cogs/utils/formats.py
 # https://github.com/Rapptz/RoboDanny/blob/b8c427ad97372cb47f16397ff04a6b80e2494757/cogs/utils/time.py
@@ -50,7 +50,7 @@ class plural:
 			return f'{v} {plural}'
 		return f'{v} {singular}'
 
-def human_join(seq, sep=', ', conj='and'):
+def natural_join(seq, sep=', ', conj='and'):
 	size = len(seq)
 	if size == 0:
 		return ''
@@ -119,15 +119,17 @@ def natural_timedelta(dt, *, source=None, accuracy=3, brief=False, ago=False):
 	if not output:
 		return 'now'
 	if not brief:
-		return human_join(output, conj='and') + suffix
+		return natural_join(output, conj='and') + suffix
 	return ' '.join(output) + suffix
 
-async def timeit(coro: Awaitable[T], _timer=time.perf_counter) -> Tuple[float, T]:
-	"""return how long it takes to await coro, in seconds, and its result"""
-	t0 = _timer()
-	result = await coro
-	t1 = _timer()
-	return t1 - t0, result
+class timeit(contextlib.AbstractContextManager):
+	def __enter__(self, _timer=time.perf_counter):
+		self.t0 = _timer()
+		return self
+
+	def __exit__(self, *excinfo, _timer=time.perf_counter):
+		self.t1 = _timer()
+		self.elapsed = self.t1 - self.t0
 
 if HAVE_PRETTYTABLE:
 	class PrettyTable(PrettyTable):
@@ -151,7 +153,7 @@ if HAVE_PRETTYTABLE:
 			for row in rows:
 				self.add_row(row)
 
-class BenCogsMisc(commands.Cog):
+class BotBinMisc(commands.Cog):
 	"""Miscellaneous commands that don't belong in any other category"""
 
 	def __init__(self, bot):
@@ -197,10 +199,6 @@ class BenCogsMisc(commands.Cog):
 		else:
 			return f"I've been up for {humanized}."
 
-	# maintain backwards compatibility
-	natural_time = staticmethod(absolute_natural_timedelta)
-	split_seconds = staticmethod(split_seconds)
-
 	@commands.command()
 	async def ping(self, context):
 		"""Shows the bots latency to Discord's servers"""
@@ -216,14 +214,8 @@ class BenCogsMisc(commands.Cog):
 		# due to loose snowflake ordering, we time travelled
 		# so leave the reply message alone
 
-	timeit = staticmethod(timeit)
-
-# maintain alias for backwards compatibility of subclasses
-class Misc(BenCogsMisc):
-	pass
-
 def setup(bot):
-	cog = BenCogsMisc(bot)
+	cog = BotBinMisc(bot)
 	bot.add_cog(cog)
 	if not hasattr(cog, 'license_message'):
 		bot.remove_command('copyright')

@@ -3,18 +3,17 @@
 import re
 from setuptools import setup
 
-with open('ben_cogs/__init__.py') as f:
+with open('bot_bin/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
 setup(
-	name='ben_cogs',
-	author='bmintz',
-	author_email='bmintz@protonmail.com',
-	description='Shared cogs for use in Discord bots',
-	url='https://github.com/bmintz/cogs',
-	download_url='https://github.com/bmintz/cogs/archive/{}.tar.gz'.format(version),
+	name='bot-bin',
+	author='lambda#0987',
+	description='Shared cogs and utilities for use in Discord bots',
+	url='https://github.com/bmintz/bot-bin',
+	download_url='https://github.com/bot-bin/cogs/archive/v{}.tar.gz'.format(version),
 	version=version,
-	packages=['ben_cogs'],
+	packages=['bot_bin'],
 	install_requires=[
 		'discord.py>=1.2.3,<2.0.0',
 		'humanize',
@@ -25,7 +24,7 @@ setup(
 			'asyncpg',
 			'prettytable']},
 	python_requires='>=3.6.0',
-	license='MIT',
+	license='BlueOak-1.0.0',
 	classifiers=[
 		'Development Status :: 3 - Alpha',
 		'Framework :: AsyncIO',

@@ -23,7 +23,7 @@ else:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('bot')
 
-class BenCogsBot(commands.AutoShardedBot):
+class Bot(commands.AutoShardedBot):
 	def __init__(self, *args, **kwargs):
 		self.config = kwargs.pop('config')
 		self._should_setup_db = kwargs.pop('setup_db', False)
@@ -35,17 +35,24 @@ class BenCogsBot(commands.AutoShardedBot):
 		super().__init__(
 			command_prefix=self.get_prefix_,
 			description=self.config.get('description'),
-			help_command=commands.MinimalHelpCommand(),
+			help_command=kwargs.pop('help_command', commands.MinimalHelpCommand()),
 			*args, **kwargs)
 		# do this after super().__init__ in case initial_activity depends on self.is_ready()
 		self.activity = self.initial_activity()
 
 	def process_config(self):
-		self.owners = set(self.config.get('owners', []))
 		self.config['success_emojis'] = {
 			k: convert_emoji(v)
 			for k, v
 			in self.config.get('success_emojis', {False: '❌', True: '✅'}).items()}
+
+		ignore_bots_conf = self.config.setdefault('ignore_bots', {})
+		ignore_bots_conf.setdefault('default', True)
+		overrides_conf = ignore_bots_conf.setdefault('overrides', {})
+		overrides_conf.setdefault('guilds', ())
+		overrides_conf.setdefault('channels', ())
+		overrides_conf['guilds'] = set(overrides_conf['guilds'])
+		overrides_conf['channels'] = set(overrides_conf['channels'])
 
 	def initial_activity(self):
 		try:
@@ -146,9 +153,6 @@ class BenCogsBot(commands.AutoShardedBot):
 			should_reply = not should_reply
 
 		return should_reply
-
-	async def is_owner(self, user):
-		return user.id in self.owners or await super().is_owner(user)
 
 	async def is_privileged(self, member):
 		return member.guild_permissions.administrator or await self.is_owner(member)
