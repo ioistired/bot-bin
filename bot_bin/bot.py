@@ -34,7 +34,7 @@ class Bot(commands.AutoShardedBot):
 
 		super().__init__(
 			command_prefix=self.get_prefix_,
-			description=self.config.get('description'),
+			description=kwargs.pop('description', self.config.get('description')),
 			help_command=kwargs.pop('help_command', commands.MinimalHelpCommand()),
 			*args, **kwargs)
 		# do this after super().__init__ in case initial_activity depends on self.is_ready()
