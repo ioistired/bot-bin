@@ -22,7 +22,7 @@ class BotBinSql(commands.Cog):
 	@sql_command.command(name='execute', aliases=['e'])
 	async def sql_execute_command(self, context, *, query):
 		"""Execute a SQL query."""
-		with timeit as timer:
+		with timeit() as timer:
 			result = await self.pool.execute(query.strip('`'))
 		elapsed = round(timer.elapsed * 1000, 2)
 
@@ -42,7 +42,7 @@ class BotBinSql(commands.Cog):
 	async def sql_fetchval_command(self, context, *, query):
 		"""Get a single value from a SQL query."""
 		with timeit() as timer:
-			result = await timeit(self.pool.fetchval(query.strip('`')))
+			result = await self.pool.fetchval(query.strip('`'))
 		elapsed = round(timer.elapsed * 1000, 2)
 
 		# fetchval returns a native python result
