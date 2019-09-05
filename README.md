@@ -24,7 +24,8 @@ Also contains various utilities:
 - `natural_timedelta` returns an English string representing the difference between two dates.
   This function differs from `absolute_natural_timedelta` in that it also supports years and months.
 - `plural` is a format object which pluralizes strings. For example: `f'Found {plural(len(results)):weapon}'`
-- `human_join` joins a sequence of strings according to English grammar
+- `natural_join` joins a sequence of strings according to English grammar
+- `timeit` is a context manager that times the code in the `with` block
 
 ## bot_bin.sql
 
