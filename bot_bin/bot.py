@@ -60,7 +60,7 @@ class Bot(commands.AutoShardedBot):
 		except KeyError:
 			return None
 
-		return prefixes and discord.Game(name=prefixes[0] + 'help')
+		return discord.Game(name=prefixes[0] + 'help') if prefixes else None
 
 	def get_prefix_(self, bot, message):
 		match = self.prefix_re.search(message.content)
