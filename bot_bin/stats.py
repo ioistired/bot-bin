@@ -63,18 +63,18 @@ class BotBinStats(commands.Cog):
 
 	async def notify_owners(self):
 		"""Notify the owner(s) of the bot if the guild count is significant."""
-		if guild_count <= 4 or guild_count & (guild_count - 1) != 0:
-			return
-
-		if hasattr(self.bot, 'owner_id'):
-			owners = [self.bot.get_user(self.bot.owner_id)]
-		elif hasattr(self.bot, 'owner_ids'):
-			owners = map(self.bot.get_user, self.bot.owner_ids)
-
 		guild_count = await self.guild_count()
 		# check if it's a power of two
 		# also typically a bot is in a few guilds for testing (test server + DBL + discord.pw),
 		# so ignore 4 guilds
+		if guild_count <= 4 or guild_count & (guild_count - 1) != 0:
+			return
+
+		if self.bot.owner_id:
+			owners = [self.bot.get_user(self.bot.owner_id)]
+		elif self.bot.owner_ids:
+			owners = map(self.bot.get_user, self.bot.owner_ids)
+
 		async def send(user):
 			await user.send(f'Guild count ({guild_count}) is a power of 2!')
 		await asyncio.gather(*map(send, owners))
