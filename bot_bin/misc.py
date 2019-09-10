@@ -19,11 +19,14 @@ else:
 def codeblock(s, *, lang=''):
 	return f'```{lang}\n{s}```'
 
-def absolute_natural_timedelta(seconds: int, *, accuracy=2):
+def absolute_natural_timedelta(seconds: Union[float, datetime.timedelta], *, accuracy=2):
+	if isinstance(seconds, datetime.timedelta):
+		seconds = seconds.total_seconds()
+	seconds = round(seconds)
 	if not seconds:
 		return '0 seconds'
 
-	split = split_seconds(round(seconds))
+	split = split_seconds(seconds)
 	words = zip(('day', 'hour', 'minute', 'second'), split)
 	pluralized = [format(plural(value), word) for word, value in words if value][:accuracy]
 	return natural_join(pluralized)
