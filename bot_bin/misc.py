@@ -31,6 +31,18 @@ def absolute_natural_timedelta(seconds: Union[float, datetime.timedelta], *, acc
 	pluralized = [format(plural(value), word) for word, value in words if value][:accuracy]
 	return natural_join(pluralized)
 
+def natural_rate(delta: Union[float, datetime.timedelta]):
+	"""return an english string representing a rate. delta is assumed to be a rate as "1 per delta"."""
+	if isinstance(delta, datetime.timedelta):
+		delta = delta.total_seconds()
+	rate = 1 / delta
+	for i, multiplier in enumerate((1, 60, 60, 24, 7)):
+		rate *= multiplier
+		if rate > 1:
+			break
+	duration = ('second', 'minute', 'hour', 'day', 'week')[i]
+	return f'{rate:.2g} per {duration}'
+
 def split_seconds(seconds: int):
 	minutes, seconds = divmod(seconds, 60)
 	hours, minutes = divmod(minutes, 60)
@@ -179,7 +191,7 @@ class BotBinMisc(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_ready(self):
-		if not hasattr(self.bot, 'start_time'):
+		if getattr(self.bot, 'start_time', None) is None:
 			self.bot.start_time = datetime.datetime.utcnow()
 
 	@commands.command(aliases=['license'])
