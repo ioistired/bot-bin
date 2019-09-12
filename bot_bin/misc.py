@@ -205,7 +205,7 @@ class BotBinMisc(commands.Cog):
 		await context.send(self.uptime())
 
 	def uptime(self, *, brief=False):
-		if not hasattr(self.bot, 'start_time'):
+		if getattr(self.bot, 'start_time', None) is None:
 			return 'Not up yet' if brief else "I'm not up yet."
 
 		humanized = natural_timedelta(self.bot.start_time, accuracy=None, brief=brief)
