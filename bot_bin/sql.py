@@ -1,7 +1,52 @@
+import contextlib
+import functools
+import inspect
+
+import aiocontextvars
 import asyncpg
 from discord.ext import commands
 
 from .misc import codeblock, timeit, PrettyTable
+
+_connection = aiocontextvars.ContextVar('connection')
+# make the interface a bit shorter
+connection = lambda: _connection.get()
+connection.set = _connection.set
+
+def optional_connection(func):
+	"""Decorator that acquires a connection for the decorated function if the contextvar is not set."""
+	class pool:
+		def __init__(self, pool):
+			self.pool = pool
+		async def __aenter__(self):
+			try:
+				# allow someone to call a decorated function twice within the same Task
+				# the second time, a new connection will be acquired
+				connection().is_closed()
+			except (asyncpg.InterfaceError, LookupError):
+				self.connection = conn = await self.pool.acquire()
+				connection.set(conn)
+				return conn
+			else:
+				return connection()
+		async def __aexit__(self, *excinfo):
+			with contextlib.suppress(AttributeError):
+				await self.pool.release(self.connection)
+
+	if inspect.isasyncgenfunction(func):
+		@functools.wraps(func)
+		async def inner(self, *args, **kwargs):
+			async with pool(self.bot.pool) as conn:
+				# this does not handle two-way async gens, but i don't have any of those either
+				async for x in func(self, *args, **kwargs):
+					yield x
+	else:
+		@functools.wraps(func)
+		async def inner(self, *args, **kwargs):
+			async with pool(self.bot.pool) as conn:
+				return await func(self, *args, **kwargs)
+
+	return inner
 
 class BotBinSql(commands.Cog):
 	def __init__(self, pool):

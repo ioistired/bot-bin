@@ -26,6 +26,7 @@ setup(
 		'objgraph'],
 	extras_require={
 		'sql': [
+			'aiocontextvars>=0.2.2',
 			'asyncpg',
 			'prettytable']},
 	python_requires='>=3.6.0',
