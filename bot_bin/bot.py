@@ -102,6 +102,10 @@ class Bot(commands.AutoShardedBot):
 		if self.should_reply(message):
 			await self.process_commands(message)
 
+	async def on_message_edit(self, before, after):
+		if before.content != after.content:
+			await self.process_commands(after)
+
 	async def process_commands(self, message):
 		# overridden because the default process_commands ignores bots now
 		ctx = await self.get_context(message)
