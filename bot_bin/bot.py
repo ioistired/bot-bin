@@ -98,18 +98,14 @@ class Bot(commands.AutoShardedBot):
 		# in case there's an activity that depends on being ready
 		await self.change_presence(activity=self.initial_activity())
 
-	async def on_message(self, message):
-		if self.should_reply(message):
-			await self.process_commands(message)
-
 	async def on_message_edit(self, before, after):
 		if before.content != after.content:
 			await self.process_commands(after)
 
 	async def process_commands(self, message):
-		# overridden because the default process_commands ignores bots now
-		ctx = await self.get_context(message)
-		await self.invoke(ctx)
+		if self.should_reply(message):
+			ctx = await self.get_context(message)
+			await self.invoke(ctx)
 
 	# based on https://github.com/Rapptz/RoboDanny/blob/ca75fae7de132e55270e53d89bc19dd2958c2ae0/bot.py#L77-L85
 	async def on_command_error(self, ctx, error):
