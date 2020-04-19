@@ -109,30 +109,31 @@ class Bot(commands.AutoShardedBot):
 
 	# based on https://github.com/Rapptz/RoboDanny/blob/ca75fae7de132e55270e53d89bc19dd2958c2ae0/bot.py#L77-L85
 	async def on_command_error(self, ctx, error):
-		if isinstance(error, commands.NoPrivateMessage):
-			await ctx.author.send('This command cannot be used in private messages.')
-		elif isinstance(error, commands.DisabledCommand):
-			message = 'Sorry. This command is disabled and cannot be used.'
-			try:
-				await ctx.author.send(message)
-			except discord.Forbidden:
-				await ctx.send(message)
-		elif isinstance(error, commands.NotOwner):
-			logger.error('%s tried to run %s but is not the owner', ctx.author, ctx.command.name)
-			await ctx.message.add_reaction(self.config['success_emojis'][False])
-		elif isinstance(error, (commands.UserInputError, commands.CheckFailure)):
-			await ctx.send(error)
-		elif (
-			isinstance(error, commands.CommandInvokeError)
-			and (not ctx.cog or type(ctx.cog).cog_command_error is commands.Cog.cog_command_error)  # not overridden
-			and not hasattr(ctx.command, 'on_error')
-		):
-			logger.error('"%s" caused an exception <%s>', ctx.message.content, ctx.message.jump_url)
-			logger.error(''.join(traceback.format_tb(error.original.__traceback__)))
-			# pylint: disable=logging-format-interpolation
-			logger.error('{0.__class__.__name__}: {0}'.format(error.original))
+		with contextlib.suppress(discord.HTTPException):
+			if isinstance(error, commands.NoPrivateMessage):
+				await ctx.author.send('This command cannot be used in private messages.')
+			elif isinstance(error, commands.DisabledCommand):
+				message = 'Sorry. This command is disabled and cannot be used.'
+				try:
+					await ctx.author.send(message)
+				except discord.Forbidden:
+					await ctx.send(message)
+			elif isinstance(error, commands.NotOwner):
+				logger.error('%s tried to run %s but is not the owner', ctx.author, ctx.command.name)
+				await ctx.message.add_reaction(self.config['success_emojis'][False])
+			elif isinstance(error, (commands.UserInputError, commands.CheckFailure)):
+				await ctx.send(error)
+			elif (
+				isinstance(error, commands.CommandInvokeError)
+				and (not ctx.cog or type(ctx.cog).cog_command_error is commands.Cog.cog_command_error)  # not overridden
+				and not hasattr(ctx.command, 'on_error')
+			):
+				logger.error('"%s" caused an exception <%s>', ctx.message.content, ctx.message.jump_url)
+				logger.error(''.join(traceback.format_tb(error.original.__traceback__)))
+				# pylint: disable=logging-format-interpolation
+				logger.error('{0.__class__.__name__}: {0}'.format(error.original))
 
-			await ctx.send('An internal error occured while trying to run that command.')
+				await ctx.send('An internal error occured while trying to run that command.')
 
 	### Utility functions
 
