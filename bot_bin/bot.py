@@ -63,7 +63,11 @@ class Bot(commands.AutoShardedBot):
 		return discord.Game(name=prefixes[0] + 'help') if prefixes else None
 
 	def get_prefix_(self, bot, message):
-		match = self.prefix_re.search(message.content)
+		re = self.prefix_re
+		if re is None:
+			return commands.when_mentioned(bot, message)
+
+		match = re.search(message.content)
 
 		if match is None:
 			# Callable prefixes must always return at least one prefix,
@@ -79,8 +83,11 @@ class Bot(commands.AutoShardedBot):
 		prefixes = self.config.get('prefixes', [])
 
 		prefixes = list(prefixes)  # ensure it's not a tuple
-		if self.is_ready():
+		try:
 			prefixes.extend([f'<@{self.user.id}>', f'<@!{self.user.id}>'])
+		except AttributeError:
+			if not prefixes:
+				return None
 
 		prefixes = '|'.join(map(re.escape, prefixes))
 		prefixes = f'(?:{prefixes})'
