@@ -21,9 +21,9 @@ class BotBinStats(commands.Cog):
 		urllib.parse.urlparse(url).netloc: url
 		for url in (
 			'https://discord.bots.gg/api/v1/bots/{}/stats',
+			'https://top.gg/api/v1/bots/{}/stats',
 			'https://discordbots.org/api/bots/{}/stats',
 			'https://botsfordiscord.com/api/bot/{}',
-			'https://lbots.org/api/v1/bots/{}/stats',
 			'https://discord.boats/api/v2/bot/{}',
 		)
 	}
