@@ -36,6 +36,7 @@ class Bot(commands.AutoShardedBot):
 			command_prefix=self.get_prefix_,
 			description=kwargs.pop('description', self.config.get('description')),
 			help_command=kwargs.pop('help_command', commands.MinimalHelpCommand()),
+			status=discord.Status.idle,  # indicate starting up
 			*args, **kwargs)
 		# do this after super().__init__ in case initial_activity depends on self.is_ready()
 		self.activity = self.initial_activity()
@@ -103,7 +104,7 @@ class Bot(commands.AutoShardedBot):
 		logger.info('ID: %s', self.user.id)
 		logger.info(separator)
 		# in case there's an activity that depends on being ready
-		await self.change_presence(activity=self.initial_activity())
+		await self.change_presence(activity=self.initial_activity(), status=discord.Status.online)
 
 	async def on_message_edit(self, before, after):
 		if before.content != after.content:
