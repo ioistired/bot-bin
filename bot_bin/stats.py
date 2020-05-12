@@ -95,7 +95,7 @@ class BotBinStats(commands.Cog):
 			await context.message.add_reaction('❌')
 			await context.send(
 				'The following APIs failed:'
-				'\n'.join(f'• {config_key}: **{status}**' for config_key, status in statuses.items()))
+				+ ('\n'.join(f'• {config_key}: **{status}**' for config_key, status in statuses.items())))
 
 	@commands.Cog.listener(name='on_guild_join')
 	@commands.Cog.listener(name='on_guild_remove')
