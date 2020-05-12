@@ -1,3 +1,4 @@
+import asyncio
 import collections
 import contextlib
 import datetime
@@ -145,6 +146,22 @@ class timeit(contextlib.AbstractContextManager):
 	def __exit__(self, *excinfo, _timer=time.perf_counter):
 		self.t1 = _timer()
 		self.elapsed = self.t1 - self.t0
+
+class TimedReactor(contextlib.AbstractAsyncContextManager):
+	"""adds a reaction to the given message if the body of the context manager takes >1s"""
+
+	def __init__(self, message):
+		self.message = message
+
+	async def __aenter__(self):
+		async def react_after_1s():
+			await asyncio.sleep(1.0)
+			await self.message.add_reaction('\N{black right-pointing triangle}\N{variation selector-16}')
+
+		self.task = asyncio.get_event_loop().create_task(react_after_1s())
+
+	async def __aexit__(self, *excinfo):
+		self.task.cancel()
 
 if HAVE_PRETTYTABLE:
 	class PrettyTable(PrettyTable):

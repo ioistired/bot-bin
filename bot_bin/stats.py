@@ -2,12 +2,15 @@ import asyncio
 import json
 import logging
 import sys
+import textwrap
 import traceback
 import urllib
 from typing import Dict
 
 import aiohttp
 from discord.ext import commands
+
+from .misc import TimedReactor
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +60,7 @@ class BotBinStats(commands.Cog):
 					logger.warning('%s failed with status code %s', config_key, resp.status)
 					logger.warning('response data: %s', await resp.text())
 
-				return config_key, resp.status
+				return config_key, (resp.status, await resp.text())
 
 		return dict(await asyncio.gather(*(post(config_key) for config_key in self.configured_apis)))
 
@@ -88,14 +91,42 @@ class BotBinStats(commands.Cog):
 	@commands.command(name='send-stats', hidden=True)
 	@commands.is_owner()
 	async def send_command(self, context):
-		statuses = await self.send()
-		if all(status in range(200, 300) for status in statuses.values()):
+		async with TimedReactor(context.message):
+			statuses = await self.send()
+
+		succeeded = []
+		failed = []
+		for config_key, (status, text) in statuses.items():
+			(succeeded if status in range(200, 300) else failed).append((config_key, status, text))
+
+		if not failed:
 			await context.message.add_reaction('✅')
-		else:
-			await context.message.add_reaction('❌')
-			await context.send(
-				'The following APIs failed:'
-				+ ('\n'.join(f'• {config_key}: **{status}**' for config_key, status in statuses.items())))
+
+		def format(apis):
+			return '\n'.join(
+				f'• {config_key}: **{status}**\n{textwrap.shorten(text, 150)}'
+				for config_key, status, text in apis
+			)
+
+		message = []
+		if succeeded:
+			message.append('The following APIs succeeded:\n' + format(succeeded))
+		if failed:
+			message.append('The following APIs failed:\n' + format(failed))
+		if not message:
+			await asyncio.gather(
+				context.message.add_reaction('❌'),
+				context.send(
+					'No APIs are currently configured. '
+					"Please double check that `bot.config['tokens']['stats']` is correctly set."
+				)
+			)
+			return
+
+		await asyncio.gather(
+			context.message.add_reaction('❌' if failed else '✅'),
+			context.send('\n\n'.join(message))
+		)
 
 	@commands.Cog.listener(name='on_guild_join')
 	@commands.Cog.listener(name='on_guild_remove')
