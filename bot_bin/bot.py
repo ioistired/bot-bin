@@ -10,14 +10,16 @@ except ImportError:
 	HAVE_ASYNCPG = False
 else:
 	HAVE_ASYNCPG = True
+
 import discord
 from discord.ext import commands
+
 try:
 	import uvloop
 except ImportError:
 	pass  # Windows
 else:
-	asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+	uvloop.install()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('bot')

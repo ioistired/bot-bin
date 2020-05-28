@@ -28,7 +28,9 @@ setup(
 		'sql': [
 			'aiocontextvars>=0.2.2',
 			'asyncpg',
-			'prettytable']},
+			'prettytable'],
+		'uvloop': [
+			'uvloop>=0.14.0,<1.0.0']},
 	python_requires='>=3.6.0',
 	license='BlueOak-1.0.0',
 	classifiers=[
