@@ -3,7 +3,6 @@ import contextlib
 import logging
 import re
 import traceback
-import uuid
 
 try:
 	import asyncpg
@@ -30,7 +29,6 @@ class Bot(commands.AutoShardedBot):
 		if self._should_setup_db and not HAVE_ASYNCPG:
 			raise ImportError('this bot requires asyncpg but it is not installed')
 		self.process_config()
-		self._fallback_prefix = str(uuid.uuid4())
 
 		super().__init__(
 			command_prefix=self.get_prefix_,
@@ -74,8 +72,8 @@ class Bot(commands.AutoShardedBot):
 			# Callable prefixes must always return at least one prefix,
 			# but no prefix was found in the message,
 			# so we still have to return *something*.
-			# Use a UUID because it's practically guaranteed not to be in the message.
-			return self._fallback_prefix
+			# Messages are guaranteed not to start with a space.
+			return ' '
 		else:
 			return match[0]
 
@@ -84,16 +82,22 @@ class Bot(commands.AutoShardedBot):
 		prefixes = self.config.get('prefixes', [])
 
 		prefixes = list(prefixes)  # ensure it's not a tuple
+		have_client_user = False
 		try:
 			prefixes.extend([f'<@{self.user.id}>', f'<@!{self.user.id}>'])
 		except AttributeError:
 			if not prefixes:
 				return None
+		else:
+			have_client_user = True
 
 		prefixes = '|'.join(map(re.escape, prefixes))
 		prefixes = f'(?:{prefixes})'
 
-		return re.compile(fr'{prefixes}\s*', re.IGNORECASE)
+		regex = re.compile(fr'{prefixes}\s*', re.IGNORECASE)
+		if have_client_user:
+			self.prefix_re = regex
+		return regex
 
 	### Events
 
