@@ -6,7 +6,7 @@ from discord.ext import commands
 
 from .socket import open_datagram_endpoint
 
-class SystemdNotifier(commands.Cog):
+class BotBinSystemdNotifier(commands.Cog):
 	def __init__(self):
 		self.os_sock = socket.socket(family=socket.AF_UNIX, type=socket.SOCK_DGRAM)
 		self.connect_task = asyncio.create_task(self.connect())
