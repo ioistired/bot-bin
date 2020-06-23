@@ -45,7 +45,11 @@ class BotBinStats(commands.Cog):
 	def cog_unload(self):
 		self.bot.loop.create_task(self.session.close())
 
-	@commands.Cog.listener(name='on_ready')
+	# this is a separate function from send() so that subclasses can override our on_ready without overriding send()
+	@commands.Cog.listener()
+	async def on_ready(self):
+		await self.send()
+
 	async def send(self) -> Dict[str, bool]:
 		"""send guild counts to the API gateways. return a dict mapping config keys to HTTP response status codes."""
 		async def post(config_key):
