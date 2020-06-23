@@ -81,6 +81,9 @@ class Bot(commands.AutoShardedBot):
 
 	@property
 	def prefix_re(self):
+		with contextlib.suppress(AttributeError):
+			return self._prefix_re
+
 		prefixes = self.config.get('prefixes', [])
 
 		prefixes = list(prefixes)  # ensure it's not a tuple
@@ -98,7 +101,7 @@ class Bot(commands.AutoShardedBot):
 
 		regex = re.compile(fr'{prefixes}\s*', re.IGNORECASE)
 		if have_client_user:
-			self.prefix_re = regex
+			self._prefix_re = regex
 		return regex
 
 	### Events
