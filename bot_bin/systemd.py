@@ -31,4 +31,4 @@ class BotBinSystemdNotifier(commands.Cog):
 
 def setup(bot):
 	if 'NOTIFY_SOCKET' in os.environ:
-		bot.add_cog(SystemdNotifier())
+		bot.add_cog(BotBinSystemdNotifier())
