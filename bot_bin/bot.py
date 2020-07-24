@@ -115,10 +115,6 @@ class Bot(commands.AutoShardedBot):
 		# in case there's an activity that depends on being ready
 		await self.change_presence(activity=self.initial_activity(), status=discord.Status.online)
 
-	async def on_message_edit(self, before, after):
-		if before.content != after.content:
-			await self.process_commands(after)
-
 	async def process_commands(self, message):
 		if self.should_reply(message):
 			ctx = await self.get_context(message)
