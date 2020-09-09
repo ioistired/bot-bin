@@ -152,9 +152,11 @@ class Bot(commands.AutoShardedBot):
 
 	def should_reply(self, message):
 		"""return whether the bot should reply to a given message"""
-		return not (
-			message.author == self.user
-			or (message.author.bot and not self.should_reply_to_bot(message)))
+		if message.author == self.user:
+			return False
+		if message.author.bot and not self.should_reply_to_bot(message):
+			return False
+		return True
 
 	def should_reply_to_bot(self, message):
 		should_reply = not self.config['ignore_bots'].get('default')
