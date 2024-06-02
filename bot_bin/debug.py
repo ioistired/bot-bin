@@ -140,9 +140,8 @@ class BotBinDebug(commands.Cog, command_attrs=dict(hidden=True)):
 
 		await context.send(f'Status: {success} Time: {(end - start) * 1000:.2f}ms')
 
-
-def setup(bot):
-	bot.add_cog(BotBinDebug())
+async def setup(bot):
+	await bot.add_cog(BotBinDebug())
 
 	if not HAVE_PSUTIL:
 		for command in 'objgrowth', 'most-common-types', 'mem':

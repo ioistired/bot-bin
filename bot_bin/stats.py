@@ -138,5 +138,5 @@ class BotBinStats(commands.Cog):
 		await self.notify_owners()
 		await self.send()
 
-def setup(bot):
-	bot.add_cog(BotBinStats(bot))
+async def setup(bot):
+	await bot.add_cog(BotBinStats(bot))

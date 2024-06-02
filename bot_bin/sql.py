@@ -59,7 +59,7 @@ class BotBinSql(commands.Cog):
 			return
 		raise
 
-	@commands.group(name='sql', aliases=['SQL'], hidden=True, invoke_without_command=False, ignore_extra=True)
+	@commands.hybrid_group(name='sql', aliases=['SQL'], hidden=True, invoke_without_command=False, ignore_extra=True)
 	@commands.is_owner()
 	async def sql_command(self, context):
 		pass
@@ -95,7 +95,7 @@ class BotBinSql(commands.Cog):
 		message = codeblock(repr(result), lang='python')
 		await context.send(f'{message}\n*Retrieved in {elapsed}ms.*')
 
-def setup(bot):
+async def setup(bot):
 	if bot.case_insensitive:
 		BotBinSql.sql_command.aliases.clear()
-	bot.add_cog(BotBinSql(bot.pool))
+	await bot.add_cog(BotBinSql(bot.pool))

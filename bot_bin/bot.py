@@ -137,16 +137,19 @@ class Bot(commands.AutoShardedBot):
 			elif isinstance(error, (commands.UserInputError, commands.CheckFailure)):
 				await ctx.send(error)
 			elif (
-				isinstance(error, commands.CommandInvokeError)
+				isinstance(error, (commands.HybridCommandError, commands.CommandInvokeError))
 				and (not ctx.cog or type(ctx.cog).cog_command_error is commands.Cog.cog_command_error)  # not overridden
 				and not hasattr(ctx.command, 'on_error')
 			):
-				logger.error('"%s" caused an exception <%s>', ctx.message.content, ctx.message.jump_url)
+				if ctx.interaction:
+					logger.error('"/%s" caused an exception', ctx.interaction.command.name)
+				else:
+					logger.error('"%s" caused an exception <%s>', ctx.message.content, ctx.message.jump_url)
 				logger.error(''.join(traceback.format_tb(error.original.__traceback__)))
 				# pylint: disable=logging-format-interpolation
 				logger.error('{0.__class__.__name__}: {0}'.format(error.original))
 
-				await ctx.send('An internal error occured while trying to run that command.')
+				await ctx.send('An internal error occured while trying to run that command.', ephemeral=True)
 
 	### Utility functions
 
@@ -175,12 +178,25 @@ class Bot(commands.AutoShardedBot):
 
 	### Init / Shutdown
 
-	async def start(self):
+	def run(self, *, reconnect: bool = True):
+		async def runner():
+			async with self:
+				await self.start(reconnect=reconnect)
+
+		try:
+			asyncio.run(runner())
+		except KeyboardInterrupt:
+			return
+
+	async def start(self, *, reconnect: bool = True):
 		if self._should_setup_db:
 			await self.init_db()
-		self.load_extensions()
+		await self.load_extensions()
 
-		await super().start(self.config['tokens'].pop('discord'))
+		await super().start(
+			self.config['tokens'].pop('discord'),
+			reconnect=reconnect,
+		)
 
 	async def close(self):
 		if self._should_setup_db:
@@ -192,9 +208,9 @@ class Bot(commands.AutoShardedBot):
 		credentials = self.config['database']
 		self.pool = await asyncpg.create_pool(**credentials)
 
-	def load_extensions(self):
+	async def load_extensions(self):
 		for extension in self.startup_extensions:  # subclasses must define this
-			self.load_extension(extension)
+			await self.load_extension(extension)
 
 def convert_emoji(s) -> discord.PartialEmoji:
 	match = re.search(r'<?(a?):([A-Za-z0-9_]+):([0-9]{17,})>?', s)

@@ -246,8 +246,8 @@ class BotBinMisc(commands.Cog):
 		# due to loose snowflake ordering, we time travelled
 		# so leave the reply message alone
 
-def setup(bot):
+async def setup(bot):
 	cog = BotBinMisc(bot)
-	bot.add_cog(cog)
+	await bot.add_cog(cog)
 	if not hasattr(cog, 'license_message'):
 		bot.remove_command('copyright')

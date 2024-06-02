@@ -11,7 +11,7 @@ with open('README.md') as f:
 
 setup(
 	name='bot-bin',
-	author='lambda#0987',
+	author='lambda0987',
 	description='Shared cogs and utilities for use in Discord bots',
 	long_description=long_description,
 	long_description_content_type='text/markdown',
@@ -20,7 +20,7 @@ setup(
 	version=version,
 	packages=['bot_bin'],
 	install_requires=[
-		'discord.py>=1.3.3,<2.0.0',
+		'discord.py>=2.0.0,<3.0.0',
 		'humanize',
 		'python-dateutil',
 		'objgraph'],

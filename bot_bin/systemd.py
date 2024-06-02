@@ -29,6 +29,6 @@ class BotBinSystemdNotifier(commands.Cog):
 	async def on_ready(self):
 		self.send(b'READY=1')
 
-def setup(bot):
+async def setup(bot):
 	if 'NOTIFY_SOCKET' in os.environ:
-		bot.add_cog(BotBinSystemdNotifier())
+		await bot.add_cog(BotBinSystemdNotifier())
