@@ -59,7 +59,7 @@ class BotBinSql(commands.Cog):
 			return
 		raise
 
-	@commands.hybrid_group(name='sql', aliases=['SQL'], hidden=True, invoke_without_command=False, ignore_extra=True)
+	@commands.group(name='sql', aliases=['SQL'], hidden=True, invoke_without_command=False, ignore_extra=True)
 	@commands.is_owner()
 	async def sql_command(self, context):
 		pass

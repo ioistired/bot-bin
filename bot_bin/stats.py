@@ -84,7 +84,9 @@ class BotBinStats(commands.Cog):
 
 		async def send(user):
 			await user.send(f'Guild count ({guild_count}) is a power of 2!')
-		await asyncio.gather(*map(send, owners))
+		async with asyncio.TaskGroup() as tg:
+			for user in owners:
+				tg.create_task(send(user))
 
 	async def guild_count(self):
 		"""Return the guild count for the bot associated with this cog.
@@ -104,7 +106,7 @@ class BotBinStats(commands.Cog):
 			(succeeded if status in range(200, 300) else failed).append((config_key, status, text))
 
 		if not failed:
-			await context.message.add_reaction('✅')
+			await context.message.add_reaction(bot.config['success_emojis'][True])
 
 		def format(apis):
 			return '\n'.join(
@@ -118,19 +120,15 @@ class BotBinStats(commands.Cog):
 		if failed:
 			message.append('The following APIs failed:\n' + format(failed))
 		if not message:
-			await asyncio.gather(
-				context.message.add_reaction('❌'),
-				context.send(
+			async with asyncio.TaskGroup() as tg:
+				tg.create_task(context.message.add_reaction(self.bot.config['success_emojis'][False]))
+				tg.create_task(context.send(
 					'No APIs are currently configured. '
 					"Please double check that `bot.config['tokens']['stats']` is correctly set."
-				)
-			)
+				))
 			return
 
-		await asyncio.gather(
-			context.message.add_reaction('❌' if failed else '✅'),
-			context.send('\n\n'.join(message))
-		)
+		await context.send('\n\n'.join(message))
 
 	@commands.Cog.listener(name='on_guild_join')
 	@commands.Cog.listener(name='on_guild_remove')

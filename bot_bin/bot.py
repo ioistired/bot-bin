@@ -142,12 +142,17 @@ class Bot(commands.AutoShardedBot):
 				and not hasattr(ctx.command, 'on_error')
 			):
 				if ctx.interaction:
-					logger.error('"/%s" caused an exception', ctx.interaction.command.name)
+					formatted = ' '.join(
+						f'{param}: “{argument}”'
+						for param, argument
+						in ctx.interaction.namespace
+					)
+					if ctx.interaction.command:
+						logger.exception('"/%s %s" caused an exception', ctx.interaction.command.name, formatted, exc_info=error)
+					else:
+						logger.exception('Non-command interaction "%s" caused an exception', formatted, exc_info=error)
 				else:
-					logger.error('"%s" caused an exception <%s>', ctx.message.content, ctx.message.jump_url)
-				logger.error(''.join(traceback.format_tb(error.original.__traceback__)))
-				# pylint: disable=logging-format-interpolation
-				logger.error('{0.__class__.__name__}: {0}'.format(error.original))
+					logger.exception('"%s" caused an exception <%s>', ctx.message.content, ctx.message.jump_url, exc_info=error)
 
 				await ctx.send('An internal error occured while trying to run that command.', ephemeral=True)
 
