@@ -133,7 +133,7 @@ class Bot(commands.AutoShardedBot):
 					await ctx.send(message)
 			elif isinstance(error, commands.NotOwner):
 				logger.error('%s tried to run %s but is not the owner', ctx.author, ctx.command.name)
-				await ctx.message.add_reaction(self.config['success_emojis'][False])
+				await ctx.send(self.config['success_emojis'][False], ephemeral=True, delete_after=3.0)
 			elif isinstance(error, (commands.UserInputError, commands.CheckFailure)):
 				await ctx.send(error)
 			elif (
