@@ -20,7 +20,7 @@ setup(
 	version=version,
 	packages=['bot_bin'],
 	install_requires=[
-		'discord.py>=2.0.0,<3.0.0',
+		'discord.py>=2.3.2,<3.0.0',
 		'humanize',
 		'python-dateutil',
 		'objgraph'],
