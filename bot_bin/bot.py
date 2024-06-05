@@ -37,6 +37,7 @@ class Bot(commands.AutoShardedBot):
 			description=kwargs.pop('description', self.config.get('description')),
 			help_command=kwargs.pop('help_command', commands.MinimalHelpCommand()),
 			status=discord.Status.idle,  # indicate starting up
+			intents=kwargs.pop('intents', discord.Intents.default()),
 			*args, **kwargs)
 		# do this after super().__init__ in case initial_activity depends on self.is_ready()
 		self.activity = self.initial_activity()
