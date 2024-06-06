@@ -131,12 +131,12 @@ class BotBinDebug(commands.Cog, command_attrs=dict(hidden=True)):
 			await new_context.command.invoke(new_context)
 		except commands.CommandError:
 			end = time.perf_counter()
-			success = '❌'
+			success = context.bot.config['success_emojis'][False]
 			with contextlib.suppress(discord.HTTPException):
 				await context.send(f'```py\n{traceback.format_exc()}\n```')
 		else:
 			end = time.perf_counter()
-			success = '✅'
+			success = context.bot.config['success_emojis'][True]
 
 		await context.send(f'Status: {success} Time: {(end - start) * 1000:.2f}ms')
 
