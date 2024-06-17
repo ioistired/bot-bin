@@ -10,6 +10,7 @@ except ImportError:
 	HAVE_ASYNCPG = False
 else:
 	HAVE_ASYNCPG = True
+	import json
 
 import discord
 from discord.ext import commands
@@ -212,7 +213,18 @@ class Bot(commands.AutoShardedBot):
 
 	async def init_db(self):
 		credentials = self.config['database']
-		self.pool = await asyncpg.create_pool(**credentials)
+
+		async def set_connection_codecs(conn):
+			# https://magicstack.github.io/asyncpg/current/usage.html#example-automatic-json-conversion
+			for json_type in 'json', 'jsonb':
+				await conn.set_type_codec(
+					json_type,
+					encoder=json.dumps,
+					decoder=json.loads,
+					schema='pg_catalog',
+				)
+
+		self.pool = await asyncpg.create_pool(init=set_connection_codecs, **credentials)
 
 	async def load_extensions(self):
 		for extension in self.startup_extensions:  # subclasses must define this
