@@ -8,6 +8,7 @@ import time
 from typing import Awaitable, Sequence, T, Tuple, Union
 
 import discord
+import discord.utils
 from discord.ext import commands
 from dateutil.relativedelta import relativedelta
 try:
@@ -80,7 +81,7 @@ def natural_join(seq, sep=', ', conj='and'):
 	return sep.join(seq[:-1]) + f' {conj} {seq[-1]}'
 
 def natural_timedelta(dt, *, source=None, accuracy=3, brief=False, ago=False):
-	now = source or datetime.datetime.utcnow()
+	now = source or discord.utils.utcnow()
 	# Microsecond free zone
 	now = now.replace(microsecond=0)
 	dt = dt.replace(microsecond=0)
