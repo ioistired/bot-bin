@@ -196,10 +196,7 @@ class BotBinMisc(commands.Cog):
 			bot.start_time = None
 
 	def _init_license(self):
-		try:
-			filename = self.bot.config.get('copyright_license_file')
-		except AttributeError:
-			return
+		filename = self.bot.config.get('copyright_license_file')
 
 		if not filename or not os.path.isfile(filename):
 			return
@@ -211,6 +208,16 @@ class BotBinMisc(commands.Cog):
 	async def on_ready(self):
 		if getattr(self.bot, 'start_time', None) is None:
 			self.bot.start_time = datetime.datetime.utcnow()
+
+	@commands.command()
+	async def support(self, ctx):
+		"""Gives you a link to the support server, where you can get help with the bot."""
+		await ctx.send('https://discord.gg/' + self.bot.config['support_server_invite_code'])
+
+	@commands.command()
+	async def source(self, ctx):
+		"""Links you to my source code."""
+		await ctx.send(self.bot.config['repo'])
 
 	@commands.command(aliases=['license'])
 	async def copyright(self, context):
@@ -252,3 +259,7 @@ async def setup(bot):
 	await bot.add_cog(cog)
 	if not hasattr(cog, 'license_message'):
 		bot.remove_command('copyright')
+	if not bot.config.get('support_server_invite_code'):
+		bot.remove_command('support')
+	if not bot.config.get('repo'):
+		bot.remove_command('source')
